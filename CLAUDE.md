@@ -9,9 +9,13 @@ Repo: `~/git/bsw_analysis` (github.com/tom-doerr/bsw_analysis)
 - `ridge_party_cv.py` — Ridge regression (precinct, 2025 only)
 - `bsw_bd_decorrelate.py` — BSW+BD sum decorrelation analysis
 - `bsw_forensic.py` — 11-test forensic battery for missing BSW votes
+- `xgb_enhanced.py` — XGBoost + Europawahl 2024 + Strukturdaten
 
-## Data (`data/`, gitignored)
+## Data (`data/`)
 - `btw{25,21,17}_wbz.zip` — Precinct-level election results
+- `ew24_wbz.zip` — Europawahl 2024 precinct results (BSW included)
+- `btw2025_strukturdaten.csv` — Sociodemographic data per Wahlkreis
+- `ew24_strukturdaten.csv` — EW24 Strukturdaten
 - `btw2025_brief_wkr.csv` — 2025 Wahlkreis-level aggregated
 - `btw2025kreis.csv` — 2025 Kreis-level aggregated
 
@@ -20,12 +24,17 @@ Repo: `~/git/bsw_analysis` (github.com/tom-doerr/bsw_analysis)
 - 2021 CSV: NO skiprows (header at row 0), BOM, E_/Z_ prefixed cols
 - 2017 CSVs: skiprows=4, latin-1 encoding, quoted fields, bare names
 - 2017 has separate erst/zweitstimmen files
+- EW24: no skiprows, semicolon, UTF-8, party cols 17-51, col 45=BSW
+- Strukturdaten: skiprows=8, semicolon, commas as decimal separators
+- EW24 has no Wahlkreis col; join via Land+Kreis+Gemeinde key
 - Party name diffs: DIE LINKE (17/21) vs Die Linke (25)
 
 ## Key Findings
-- BSW R²=0.73 (rank 9/29), hardest major party to predict (new, no history)
+- LR baseline: BSW R²=0.73 (rank 9/29), new party = hard to predict
+- XGBoost+EW24+SD: BSW R²=0.81 (+0.08), biggest major party gain
+- Top BSW features: 2017 Die Linke Erst (42%), EW24 BSW (17%), 2021 AfD (6%)
 - Major parties (CDU, AfD, CSU, GRÜNE, Die Linke, SPD) all R²>0.89
-- FDP also relatively hard (R²=0.65)
+- FDP also relatively hard (LR R²=0.65, XGB R²=0.70)
 - BSW biggest anomalies in Brandenburg and Sachsen-Anhalt
 
 ## Forensic Results (no evidence of fraud)

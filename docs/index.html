@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<title>BSW Election Analysis</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div id="top-bar">
+  <h1>BSW Election Analysis — 3D Dashboard</h1>
+  <div id="chips"></div>
+</div>
+<div id="sidebar">
+  <h3>Party</h3>
+  <select id="party-select"></select>
+  <h3>Metric</h3>
+  <div id="metric-radios"></div>
+  <h3>Height</h3>
+  <label><input type="checkbox" id="extrude-toggle" checked>
+    Extrude</label>
+  <div id="legend"></div>
+</div>
+<div id="info-panel" class="hidden"></div>
+<div id="tooltip" class="hidden"></div>
+<canvas id="canvas"></canvas>
+<script type="importmap">
+{"imports":{
+  "three":"https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js",
+  "three/addons/":"https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"
+}}
+</script>
+<script type="module" src="js/main.js"></script>
+</body>
+</html>

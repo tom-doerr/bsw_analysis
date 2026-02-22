@@ -1,16 +1,21 @@
 # BSW Analysis
 
 Predicting 2025 Bundestagswahl Zweitstimme shares at polling
-station (Wahlbezirk) level using linear regression, plus
-comprehensive forensic analysis searching for evidence of
+station (Wahlbezirk) level using linear regression and XGBoost,
+plus comprehensive forensic analysis searching for evidence of
 missing or miscounted BSW votes.
 
 ## Data
 
-Download into `data/`:
+Included in `data/` (public government data):
 - `btw25_wbz.zip` — 2025 precinct results (~95k precincts)
 - `btw21_wbz.zip` — 2021 precinct results
 - `btw17_wbz.zip` — 2017 precinct results
+- `ew24_wbz.zip` — Europawahl 2024 precinct results (BSW included)
+- `btw2025_strukturdaten.csv` — Sociodemographic data per Wahlkreis
+- `ew24_strukturdaten.csv` — EW24 Strukturdaten
+
+Source: [bundeswahlleiterin.de](https://www.bundeswahlleiterin.de)
 
 ## Scripts
 
@@ -18,34 +23,52 @@ Download into `data/`:
 - `ridge_party_cv.py` — Ridge regression (precinct-level, 2025 only)
 - `bsw_bd_decorrelate.py` — BSW+BD sum decorrelation analysis
 - `bsw_forensic.py` — 11-test forensic battery for missing votes
+- `xgb_enhanced.py` — XGBoost + Europawahl 2024 + Strukturdaten
 
-## Features (210 total)
+## Features
 
+**LR baseline (210 features):**
 - 2025 Erststimme shares per party (28 cols)
 - 2025 structural: turnout, invalid rates, log(voters)
-- 2021 Erst+Zweit shares per party (aggregated to Wahlkreis)
-- 2017 Erst+Zweit shares per party (aggregated to Wahlkreis)
+- 2021 Erst+Zweit shares aggregated to Wahlkreis
+- 2017 Erst+Zweit shares aggregated to Wahlkreis
 - Bundesland one-hot encoding (15 cols, drop_first)
+
+**XGBoost enhanced (+71 = 281 features):**
+- Europawahl 2024 party shares (35 cols, Gemeinde-level join)
+- Strukturdaten demographics (36 cols, Wahlkreis-level join)
 
 ## Prediction Results
 
-95,046 precincts, 210 features, 29 party models.
-Pipeline: StandardScaler + LinearRegression, 10-fold CV.
+95,046 precincts, 29 party models, 10-fold CV.
 
-| Party | R² | Spearman | MAE (pp) | Mean share |
-|-------|-----|----------|----------|------------|
-| CSU | 0.995 | 0.684 | 0.58 | 7.2% |
-| AfD | 0.982 | 0.989 | 1.17 | 22.4% |
-| CDU | 0.981 | 0.985 | 1.30 | 21.4% |
-| GRÜNE | 0.939 | 0.961 | 1.27 | 10.8% |
-| Die Linke | 0.915 | 0.919 | 1.23 | 8.5% |
-| SPD | 0.893 | 0.948 | 1.53 | 15.8% |
-| FREIE WÄHLER | 0.827 | 0.828 | 0.60 | 1.7% |
-| **BSW** | **0.731** | **0.781** | **1.17** | **5.0%** |
-| FDP | 0.652 | 0.799 | 0.82 | 4.2% |
+| Party | LR R² | XGB R² | Δ | MAE (pp) |
+|-------|-------|--------|------|----------|
+| CSU | 0.995 | 0.996 | +0.002 | 0.31 |
+| AfD | 0.982 | 0.990 | +0.008 | 0.88 |
+| CDU | 0.981 | 0.986 | +0.005 | 1.06 |
+| GRÜNE | 0.939 | 0.962 | +0.022 | 1.01 |
+| Die Linke | 0.915 | 0.945 | +0.031 | 1.01 |
+| SPD | 0.893 | 0.928 | +0.035 | 1.26 |
+| FREIE WÄHLER | 0.827 | 0.877 | +0.050 | 0.49 |
+| **BSW** | **0.731** | **0.809** | **+0.078** | **0.98** |
+| FDP | 0.652 | 0.701 | +0.049 | 0.77 |
 
-BSW ranks 9th/29 in R² — harder to predict since it's a new
-party with no 2017/2021 Zweitstimme history.
+BSW has the largest R² improvement of any major party (+0.078),
+driven by Europawahl 2024 BSW data and XGBoost non-linearities.
+
+### BSW Feature Importances (XGBoost)
+
+| Rank | Feature | Importance |
+|------|---------|------------|
+| 1 | 2017 Die Linke Erststimme | 42.3% |
+| 2 | EW24 BSW Zweitstimme | 16.8% |
+| 3 | 2021 AfD Zweitstimme | 6.1% |
+| 4 | Sachsen (Land dummy) | 3.2% |
+| 5 | Foreigner population % | 0.9% |
+
+BSW draws primarily from former Die Linke voters and
+AfD-adjacent demographics in eastern Germany.
 
 ## Forensic Analysis: BSW Vote Integrity
 
@@ -133,18 +156,27 @@ heterogeneity, not a "depleted" fraud subpopulation.
 essentially nothing (all |r| < 0.02). The model already
 captures all systematic variation; remaining errors are noise.
 
+### XGBoost Residual Confirmation
+
+The improved XGBoost model (R²=0.81, 29% less unexplained
+variance) confirms all findings. BSW residuals have positive
+skew (+0.51), near-zero mean residuals in every Bundesland,
+and identical distributional shape to FDP and Die Linke.
+The lower noise floor makes the picture *cleaner*, not more
+suspicious.
+
 ### Conclusion
 
 **No evidence of missing or miscounted BSW votes.** Every
-forensic test either shows normal patterns or BSW behaves
-identically to control parties (FDP, Die Linke). BSW's lower
-R² (0.73 vs 0.89+ for major parties) is fully explained by
-its novelty: no 2017/2021 Zweitstimme history.
+forensic test shows normal patterns across both LR and XGBoost
+models. BSW behaves identically to control parties (FDP,
+Die Linke) on all 11 tests.
 
 ## Usage
 
 ```
-python3 wahlbezirk_lr.py        # prediction models
+python3 wahlbezirk_lr.py        # LR prediction models
+python3 xgb_enhanced.py         # XGBoost + EW24 + Strukturdaten
 python3 bsw_bd_decorrelate.py   # decorrelation analysis
 python3 bsw_forensic.py         # forensic battery
 ```

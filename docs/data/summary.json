@@ -1,0 +1,52 @@
+{
+  "n_precincts": 95046,
+  "n_features_lr": 210,
+  "n_features_xgb": 281,
+  "parties": {
+    "BSW": {
+      "lr_r2": 0.7309,
+      "xgb_r2": 0.8085,
+      "xgb_mae": 0.983
+    },
+    "AfD": {
+      "lr_r2": 0.982,
+      "xgb_r2": 0.9896,
+      "xgb_mae": 0.881
+    },
+    "CDU": {
+      "lr_r2": 0.9815,
+      "xgb_r2": 0.9863,
+      "xgb_mae": 1.061
+    },
+    "SPD": {
+      "lr_r2": 0.8929,
+      "xgb_r2": 0.9276,
+      "xgb_mae": 1.259
+    },
+    "GRÜNE": {
+      "lr_r2": 0.9395,
+      "xgb_r2": 0.9619,
+      "xgb_mae": 1.01
+    },
+    "CSU": {
+      "lr_r2": 0.9948,
+      "xgb_r2": 0.9964,
+      "xgb_mae": 0.307
+    },
+    "FDP": {
+      "lr_r2": 0.6524,
+      "xgb_r2": 0.7014,
+      "xgb_mae": 0.77
+    },
+    "Die Linke": {
+      "lr_r2": 0.9146,
+      "xgb_r2": 0.9451,
+      "xgb_mae": 1.011
+    },
+    "FREIE WÄHLER": {
+      "lr_r2": 0.8272,
+      "xgb_r2": 0.8772,
+      "xgb_mae": 0.486
+    }
+  }
+}
