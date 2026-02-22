@@ -15,6 +15,7 @@ Repo: `~/git/bsw_analysis` (github.com/tom-doerr/bsw_analysis)
 - `aggregate_swing_wkr.py` — Aggregate swing to Wahlkreis
 - `prep_dashboard.py` — Build JSON for Three.js dashboard
 - `generate_report.py` — HTML report with Plotly charts
+- `bsw_evidence.py` — 6-analysis case for BSW crossing 5%
 
 ## Data (`data/`)
 - `btw{25,21,17}_wbz.zip` — Precinct-level election results
@@ -55,6 +56,12 @@ Repo: `~/git/bsw_analysis` (github.com/tom-doerr/bsw_analysis)
 - Claim 2 (zero-vote precincts): 481 zeros (1.41x expected), max impact +2,873 votes (< 9,529 needed)
 - Claim 3 (extrapolation from 50 recounts): sample biased (BSW-selected), not representative
 - Claim 4 (disproportionate corrections): selection bias makes analysis uninformative
+
+## BSW Evidence Analysis (case for 5%)
+- 6 analyses: visibility, recount MC, BD adjacency, excess zeros, ZIP, small-precinct
+- Conservative: 5.3k votes (insufficient), Central: 12.6k (sufficient), Optimistic: 34.7k
+- BSW Erst coverage: 6/16 Länder, within-Land visibility boost in NW/BE
+- ZIP: BSW π=0.0072 vs controls π=0.0045, excess structural zeros ~187
 
 ## Data Columns (raw 2025)
 - Bezirksart: 0=Urne (66.5k), 5=Brief (28.6k), 6/8 rare

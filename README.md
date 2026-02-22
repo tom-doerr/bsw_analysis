@@ -28,6 +28,7 @@ Datenquelle: © Die Bundeswahlleiterin, Wiesbaden 2025 ([bundeswahlleiterin.de](
 - `bsw_forensic.py` — 11-test forensic battery for missing votes
 - `bsw_claims_test.py` — Tests BSW's 4 specific claims about miscounting
 - `xgb_enhanced.py` — XGBoost + Europawahl 2024 + Strukturdaten
+- `bsw_evidence.py` — 6-analysis case for BSW crossing 5%
 
 ## Features
 
@@ -197,6 +198,14 @@ invalidates national extrapolation. **Not representative.**
 corrections went to BSW, but precincts were BSW-selected.
 4,277 = 0.009% of all votes. **Selection bias.**
 
+## Evidence Analysis: Case for BSW Crossing 5%
+
+Six analyses estimating potential missing BSW votes
+(deficit: 9,529). Scenarios (effects overlap):
+- **Conservative** (zeros + small): 5,300
+- **Central** (25% recount + zeros + ZIP): 12,562
+- **Optimistic** (visibility + recount + BD): 34,721
+
 ## Usage
 
 ```
@@ -205,4 +214,5 @@ python3 xgb_enhanced.py         # XGBoost + EW24 + Strukturdaten
 python3 bsw_bd_decorrelate.py   # decorrelation analysis
 python3 bsw_forensic.py         # forensic battery
 python3 bsw_claims_test.py      # BSW's specific claims
+python3 bsw_evidence.py         # evidence for crossing 5%
 ```
