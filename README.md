@@ -23,6 +23,7 @@ Datenquelle: © Die Bundeswahlleiterin, Wiesbaden 2025 ([bundeswahlleiterin.de](
 - `ridge_party_cv.py` — Ridge regression (precinct-level, 2025 only)
 - `bsw_bd_decorrelate.py` — BSW+BD sum decorrelation analysis
 - `bsw_forensic.py` — 11-test forensic battery for missing votes
+- `bsw_claims_test.py` — Tests BSW's 4 specific claims about miscounting
 - `xgb_enhanced.py` — XGBoost + Europawahl 2024 + Strukturdaten
 
 ## Features
@@ -172,6 +173,27 @@ forensic test shows normal patterns across both LR and XGBoost
 models. BSW behaves identically to control parties (FDP,
 Die Linke) on all 11 tests.
 
+### BSW's Specific Claims
+
+BSW got 4.981%, missing the 5% threshold by 9,529 votes.
+The party made four specific claims about vote miscounting:
+
+**Claim 1: BSW↔BD ballot confusion** — Residual correlation
+r=+0.004 (no anti-correlation). Would need 81% of ALL BD
+votes transferred to reach 5%. **No evidence.**
+
+**Claim 2: Zero-vote precincts** — 481 BSW=0 Urne precincts
+(1.41x expected). Max impact +2,873 votes, far short of
+9,529 needed. **Insufficient magnitude.**
+
+**Claim 3: Correction extrapolation** — 50 BSW-selected
+recounts found 0.3 extra votes/precinct. Selection bias
+invalidates national extrapolation. **Not representative.**
+
+**Claim 4: Disproportionate corrections** — 57.6% of
+corrections went to BSW, but precincts were BSW-selected.
+4,277 = 0.009% of all votes. **Selection bias.**
+
 ## Usage
 
 ```
@@ -179,4 +201,5 @@ python3 wahlbezirk_lr.py        # LR prediction models
 python3 xgb_enhanced.py         # XGBoost + EW24 + Strukturdaten
 python3 bsw_bd_decorrelate.py   # decorrelation analysis
 python3 bsw_forensic.py         # forensic battery
+python3 bsw_claims_test.py      # BSW's specific claims
 ```

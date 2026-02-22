@@ -9,6 +9,7 @@ Repo: `~/git/bsw_analysis` (github.com/tom-doerr/bsw_analysis)
 - `ridge_party_cv.py` — Ridge regression (precinct, 2025 only)
 - `bsw_bd_decorrelate.py` — BSW+BD sum decorrelation analysis
 - `bsw_forensic.py` — 11-test forensic battery for missing BSW votes
+- `bsw_claims_test.py` — Tests BSW's 4 specific claims about vote miscounting
 - `xgb_enhanced.py` — XGBoost + Europawahl 2024 + Strukturdaten
 
 ## Data (`data/`)
@@ -44,6 +45,12 @@ Repo: `~/git/bsw_analysis` (github.com/tom-doerr/bsw_analysis)
   geo clustering, zero-vote Poisson, GMM, feature importance
 - BSW patterns match controls (FDP, Die Linke) on all tests
 - East-West Brief/Urne split matches Die Linke pattern exactly
+
+## BSW Claims Test Results
+- Claim 1 (BSW↔BD ballot swap): r=+0.004, no swap signature. Need 81% of ALL BD votes for 5%.
+- Claim 2 (zero-vote precincts): 481 zeros (1.41x expected), max impact +2,873 votes (< 9,529 needed)
+- Claim 3 (extrapolation from 50 recounts): sample biased (BSW-selected), not representative
+- Claim 4 (disproportionate corrections): selection bias makes analysis uninformative
 
 ## Data Columns (raw 2025)
 - Bezirksart: 0=Urne (66.5k), 5=Brief (28.6k), 6/8 rare
