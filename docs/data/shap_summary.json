@@ -1,0 +1,740 @@
+{
+  "BSW": [
+    {
+      "feature": "ew24_BSW",
+      "shap": 1.1748
+    },
+    {
+      "feature": "e25_Die Linke",
+      "shap": 0.5571
+    },
+    {
+      "feature": "e25_AfD",
+      "shap": 0.301
+    },
+    {
+      "feature": "e25_BSW",
+      "shap": 0.2255
+    },
+    {
+      "feature": "e25_GR\u00dcNE",
+      "shap": 0.2147
+    },
+    {
+      "feature": "s25_inv_e",
+      "shap": 0.1739
+    },
+    {
+      "feature": "e25_FREIE W\u00c4HLER",
+      "shap": 0.1634
+    },
+    {
+      "feature": "s25_turnout",
+      "shap": 0.1346
+    },
+    {
+      "feature": "e17_Die Linke",
+      "shap": 0.1244
+    },
+    {
+      "feature": "e25_CDU",
+      "shap": 0.1028
+    },
+    {
+      "feature": "s25_log_wa",
+      "shap": 0.0636
+    },
+    {
+      "feature": "e25_B\u00dcNDNIS DEUTSCHLAND",
+      "shap": 0.0614
+    },
+    {
+      "feature": "s25_inv_z",
+      "shap": 0.0576
+    },
+    {
+      "feature": "e25_SPD",
+      "shap": 0.0553
+    },
+    {
+      "feature": "e25_CSU",
+      "shap": 0.0477
+    },
+    {
+      "feature": "z17_PIRATEN",
+      "shap": 0.0431
+    },
+    {
+      "feature": "e25_Volt",
+      "shap": 0.0417
+    },
+    {
+      "feature": "e25_\u00dcbrige",
+      "shap": 0.0411
+    },
+    {
+      "feature": "ew24_DAVA",
+      "shap": 0.0398
+    },
+    {
+      "feature": "ew24_FREIE W\u00c4HLER",
+      "shap": 0.0354
+    }
+  ],
+  "AfD": [
+    {
+      "feature": "e25_AfD",
+      "shap": 8.2404
+    },
+    {
+      "feature": "e25_GR\u00dcNE",
+      "shap": 0.7829
+    },
+    {
+      "feature": "s25_log_wa",
+      "shap": 0.3866
+    },
+    {
+      "feature": "ew24_AfD",
+      "shap": 0.3694
+    },
+    {
+      "feature": "e25_SPD",
+      "shap": 0.2736
+    },
+    {
+      "feature": "e25_Die Linke",
+      "shap": 0.1703
+    },
+    {
+      "feature": "e25_CDU",
+      "shap": 0.1308
+    },
+    {
+      "feature": "e25_FREIE W\u00c4HLER",
+      "shap": 0.1051
+    },
+    {
+      "feature": "ew24_FREIE W\u00c4HLER",
+      "shap": 0.0802
+    },
+    {
+      "feature": "s25_turnout",
+      "shap": 0.0797
+    },
+    {
+      "feature": "z21_FREIE W\u00c4HLER",
+      "shap": 0.0684
+    },
+    {
+      "feature": "s25_inv_e",
+      "shap": 0.0674
+    },
+    {
+      "feature": "e25_BSW",
+      "shap": 0.0507
+    },
+    {
+      "feature": "e21_AfD",
+      "shap": 0.0495
+    },
+    {
+      "feature": "e25_B\u00dcNDNIS DEUTSCHLAND",
+      "shap": 0.0444
+    },
+    {
+      "feature": "e25_CSU",
+      "shap": 0.0338
+    },
+    {
+      "feature": "e25_FDP",
+      "shap": 0.0306
+    },
+    {
+      "feature": "ew24_BSW",
+      "shap": 0.0303
+    },
+    {
+      "feature": "ew24_GR\u00dcNE",
+      "shap": 0.0301
+    },
+    {
+      "feature": "ew24_SPD",
+      "shap": 0.0282
+    }
+  ],
+  "CDU": [
+    {
+      "feature": "e25_CDU",
+      "shap": 8.7375
+    },
+    {
+      "feature": "land_9",
+      "shap": 2.1016
+    },
+    {
+      "feature": "e25_Die Linke",
+      "shap": 0.8057
+    },
+    {
+      "feature": "e25_AfD",
+      "shap": 0.5282
+    },
+    {
+      "feature": "e25_GR\u00dcNE",
+      "shap": 0.2224
+    },
+    {
+      "feature": "s25_log_wa",
+      "shap": 0.1635
+    },
+    {
+      "feature": "ew24_CSU",
+      "shap": 0.1298
+    },
+    {
+      "feature": "ew24_CDU",
+      "shap": 0.1221
+    },
+    {
+      "feature": "e25_SPD",
+      "shap": 0.1094
+    },
+    {
+      "feature": "e21_CDU",
+      "shap": 0.0993
+    },
+    {
+      "feature": "e17_CDU",
+      "shap": 0.063
+    },
+    {
+      "feature": "ew24_BSW",
+      "shap": 0.0565
+    },
+    {
+      "feature": "s25_turnout",
+      "shap": 0.0531
+    },
+    {
+      "feature": "sd_Bestand an Wohnungen am 31.12.2023 - insgesamt (je",
+      "shap": 0.0511
+    },
+    {
+      "feature": "e25_Volt",
+      "shap": 0.0488
+    },
+    {
+      "feature": "z17_V-Partei\u00b3",
+      "shap": 0.0471
+    },
+    {
+      "feature": "e21_Die Linke",
+      "shap": 0.0465
+    },
+    {
+      "feature": "ew24_AfD",
+      "shap": 0.039
+    },
+    {
+      "feature": "z21_SPD",
+      "shap": 0.038
+    },
+    {
+      "feature": "e21_SPD",
+      "shap": 0.0347
+    }
+  ],
+  "SPD": [
+    {
+      "feature": "e25_SPD",
+      "shap": 4.0967
+    },
+    {
+      "feature": "ew24_SPD",
+      "shap": 0.5553
+    },
+    {
+      "feature": "e25_AfD",
+      "shap": 0.2959
+    },
+    {
+      "feature": "e17_SPD",
+      "shap": 0.1816
+    },
+    {
+      "feature": "e25_Die Linke",
+      "shap": 0.174
+    },
+    {
+      "feature": "s25_turnout",
+      "shap": 0.1595
+    },
+    {
+      "feature": "e21_SPD",
+      "shap": 0.1486
+    },
+    {
+      "feature": "e25_GR\u00dcNE",
+      "shap": 0.144
+    },
+    {
+      "feature": "s25_log_wa",
+      "shap": 0.1147
+    },
+    {
+      "feature": "e25_CDU",
+      "shap": 0.0997
+    },
+    {
+      "feature": "e25_FDP",
+      "shap": 0.0889
+    },
+    {
+      "feature": "sd_Unternehmensregister 2022 - Handwerksunternehmen (",
+      "shap": 0.0874
+    },
+    {
+      "feature": "z21_Volt",
+      "shap": 0.0776
+    },
+    {
+      "feature": "z17_SPD",
+      "shap": 0.0606
+    },
+    {
+      "feature": "e21_CDU",
+      "shap": 0.0605
+    },
+    {
+      "feature": "z21_FREIE W\u00c4HLER",
+      "shap": 0.0534
+    },
+    {
+      "feature": "s25_inv_z",
+      "shap": 0.0522
+    },
+    {
+      "feature": "sd_Bruttoinlandsprodukt 2021 (EUR je EW)",
+      "shap": 0.0516
+    },
+    {
+      "feature": "z21_SPD",
+      "shap": 0.0505
+    },
+    {
+      "feature": "sd_Wohnfl\u00e4che am 31.12.2023 (je Wohnung)",
+      "shap": 0.0493
+    }
+  ],
+  "GR\u00dcNE": [
+    {
+      "feature": "e25_GR\u00dcNE",
+      "shap": 4.7735
+    },
+    {
+      "feature": "e25_AfD",
+      "shap": 0.5681
+    },
+    {
+      "feature": "e25_SPD",
+      "shap": 0.3165
+    },
+    {
+      "feature": "ew24_GR\u00dcNE",
+      "shap": 0.1703
+    },
+    {
+      "feature": "s25_log_wa",
+      "shap": 0.1442
+    },
+    {
+      "feature": "e25_Die Linke",
+      "shap": 0.129
+    },
+    {
+      "feature": "sd_Unternehmensregister 2022 - Unternehmen insgesamt",
+      "shap": 0.0897
+    },
+    {
+      "feature": "e25_Volt",
+      "shap": 0.0684
+    },
+    {
+      "feature": "z21_Volt",
+      "shap": 0.0671
+    },
+    {
+      "feature": "e25_FREIE W\u00c4HLER",
+      "shap": 0.0652
+    },
+    {
+      "feature": "s25_inv_e",
+      "shap": 0.0634
+    },
+    {
+      "feature": "ew24_Volt",
+      "shap": 0.0617
+    },
+    {
+      "feature": "sd_Bruttoinlandsprodukt 2021 (EUR je EW)",
+      "shap": 0.0563
+    },
+    {
+      "feature": "s25_turnout",
+      "shap": 0.0506
+    },
+    {
+      "feature": "s21_inv_z",
+      "shap": 0.0482
+    },
+    {
+      "feature": "e21_GR\u00dcNE",
+      "shap": 0.0466
+    },
+    {
+      "feature": "ew24_DAVA",
+      "shap": 0.0453
+    },
+    {
+      "feature": "ew24_AfD",
+      "shap": 0.044
+    },
+    {
+      "feature": "ew24_SPD",
+      "shap": 0.0427
+    },
+    {
+      "feature": "z17_BGE",
+      "shap": 0.0398
+    }
+  ],
+  "Die Linke": [
+    {
+      "feature": "e25_Die Linke",
+      "shap": 3.1678
+    },
+    {
+      "feature": "e25_CDU",
+      "shap": 0.5497
+    },
+    {
+      "feature": "e25_GR\u00dcNE",
+      "shap": 0.4527
+    },
+    {
+      "feature": "ew24_DIE LINKE",
+      "shap": 0.3995
+    },
+    {
+      "feature": "e25_AfD",
+      "shap": 0.3287
+    },
+    {
+      "feature": "e25_SPD",
+      "shap": 0.2001
+    },
+    {
+      "feature": "s25_log_wa",
+      "shap": 0.1614
+    },
+    {
+      "feature": "sd_Gemeinden am 31.12.2023 (Anzahl)",
+      "shap": 0.0923
+    },
+    {
+      "feature": "ew24_Die PARTEI",
+      "shap": 0.0903
+    },
+    {
+      "feature": "e25_BSW",
+      "shap": 0.0872
+    },
+    {
+      "feature": "e25_CSU",
+      "shap": 0.0756
+    },
+    {
+      "feature": "e25_Volt",
+      "shap": 0.0555
+    },
+    {
+      "feature": "sd_PKW-Bestand am 01.01.2024 - PKW insgesamt (je 1000",
+      "shap": 0.0527
+    },
+    {
+      "feature": "s25_turnout",
+      "shap": 0.0474
+    },
+    {
+      "feature": "e25_FDP",
+      "shap": 0.0405
+    },
+    {
+      "feature": "ew24_MERA25",
+      "shap": 0.0404
+    },
+    {
+      "feature": "ew24_SPD",
+      "shap": 0.0399
+    },
+    {
+      "feature": "ew24_Volt",
+      "shap": 0.0367
+    },
+    {
+      "feature": "land_16",
+      "shap": 0.0341
+    },
+    {
+      "feature": "sd_Empf\u00e4nger/-innen von Leistungen nach SGB II  Augus",
+      "shap": 0.0284
+    }
+  ],
+  "FDP": [
+    {
+      "feature": "e25_FDP",
+      "shap": 0.9451
+    },
+    {
+      "feature": "e25_CDU",
+      "shap": 0.3001
+    },
+    {
+      "feature": "e25_AfD",
+      "shap": 0.1689
+    },
+    {
+      "feature": "s25_log_wa",
+      "shap": 0.1622
+    },
+    {
+      "feature": "ew24_FDP",
+      "shap": 0.1343
+    },
+    {
+      "feature": "e25_SPD",
+      "shap": 0.0749
+    },
+    {
+      "feature": "e25_Die Linke",
+      "shap": 0.0716
+    },
+    {
+      "feature": "s25_turnout",
+      "shap": 0.0708
+    },
+    {
+      "feature": "e25_GR\u00dcNE",
+      "shap": 0.062
+    },
+    {
+      "feature": "e25_FREIE W\u00c4HLER",
+      "shap": 0.0386
+    },
+    {
+      "feature": "z21_FDP",
+      "shap": 0.0353
+    },
+    {
+      "feature": "ew24_CDU",
+      "shap": 0.0346
+    },
+    {
+      "feature": "s25_inv_e",
+      "shap": 0.0345
+    },
+    {
+      "feature": "e25_CSU",
+      "shap": 0.033
+    },
+    {
+      "feature": "sd_PKW-Bestand am 01.01.2024 - PKW mit Elektro- oder",
+      "shap": 0.0311
+    },
+    {
+      "feature": "sd_Bev\u00f6lkerung am 31.12.2023 - Ausl\u00e4nder/-innen (%)",
+      "shap": 0.0264
+    },
+    {
+      "feature": "sd_Wohnfl\u00e4che am 31.12.2023 (je Wohnung)",
+      "shap": 0.0231
+    },
+    {
+      "feature": "ew24_AfD",
+      "shap": 0.023
+    },
+    {
+      "feature": "z17_BGE",
+      "shap": 0.0215
+    },
+    {
+      "feature": "e21_Die Linke",
+      "shap": 0.0166
+    }
+  ],
+  "CSU": [
+    {
+      "feature": "e25_CSU",
+      "shap": 7.7728
+    },
+    {
+      "feature": "land_9",
+      "shap": 3.3435
+    },
+    {
+      "feature": "e21_CDU",
+      "shap": 0.2613
+    },
+    {
+      "feature": "e25_Die Linke",
+      "shap": 0.1525
+    },
+    {
+      "feature": "ew24_CSU",
+      "shap": 0.1123
+    },
+    {
+      "feature": "e25_AfD",
+      "shap": 0.0871
+    },
+    {
+      "feature": "s25_log_wa",
+      "shap": 0.085
+    },
+    {
+      "feature": "e25_GR\u00dcNE",
+      "shap": 0.0701
+    },
+    {
+      "feature": "e25_SPD",
+      "shap": 0.0525
+    },
+    {
+      "feature": "e25_FREIE W\u00c4HLER",
+      "shap": 0.045
+    },
+    {
+      "feature": "e21_CSU",
+      "shap": 0.0295
+    },
+    {
+      "feature": "ew24_SPD",
+      "shap": 0.0253
+    },
+    {
+      "feature": "sd_Bev\u00f6lkerung am 31.12.2023 - Ausl\u00e4nder/-innen (%)",
+      "shap": 0.0245
+    },
+    {
+      "feature": "z21_LKR",
+      "shap": 0.0235
+    },
+    {
+      "feature": "ew24_\u00d6DP",
+      "shap": 0.0207
+    },
+    {
+      "feature": "z17_DM",
+      "shap": 0.0199
+    },
+    {
+      "feature": "e17_FREIE W\u00c4HLER",
+      "shap": 0.019
+    },
+    {
+      "feature": "sd_Zu- (+) bzw. Abnahme (-) der Bev\u00f6lkerung 2022 - Wa",
+      "shap": 0.0183
+    },
+    {
+      "feature": "s25_inv_e",
+      "shap": 0.0164
+    },
+    {
+      "feature": "ew24_DIE LINKE",
+      "shap": 0.0156
+    }
+  ],
+  "FREIE W\u00c4HLER": [
+    {
+      "feature": "e25_FREIE W\u00c4HLER",
+      "shap": 1.0137
+    },
+    {
+      "feature": "ew24_FREIE W\u00c4HLER",
+      "shap": 0.2102
+    },
+    {
+      "feature": "s25_log_wa",
+      "shap": 0.1351
+    },
+    {
+      "feature": "ew24_CSU",
+      "shap": 0.0829
+    },
+    {
+      "feature": "e25_GR\u00dcNE",
+      "shap": 0.0661
+    },
+    {
+      "feature": "e25_CSU",
+      "shap": 0.0628
+    },
+    {
+      "feature": "z21_BP",
+      "shap": 0.0501
+    },
+    {
+      "feature": "z17_FREIE W\u00c4HLER",
+      "shap": 0.0361
+    },
+    {
+      "feature": "e25_Die Linke",
+      "shap": 0.0343
+    },
+    {
+      "feature": "e25_SPD",
+      "shap": 0.0281
+    },
+    {
+      "feature": "e25_AfD",
+      "shap": 0.0269
+    },
+    {
+      "feature": "z21_V-Partei\u00b3",
+      "shap": 0.0259
+    },
+    {
+      "feature": "s25_turnout",
+      "shap": 0.025
+    },
+    {
+      "feature": "e25_BSW",
+      "shap": 0.0215
+    },
+    {
+      "feature": "ew24_BSW",
+      "shap": 0.0209
+    },
+    {
+      "feature": "ew24_FDP",
+      "shap": 0.0162
+    },
+    {
+      "feature": "e25_Volt",
+      "shap": 0.0161
+    },
+    {
+      "feature": "e25_CDU",
+      "shap": 0.0143
+    },
+    {
+      "feature": "ew24_SPD",
+      "shap": 0.0136
+    },
+    {
+      "feature": "z21_FREIE W\u00c4HLER",
+      "shap": 0.0113
+    }
+  ]
+}

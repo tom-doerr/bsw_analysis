@@ -79,13 +79,14 @@ export function updateMap(meshes, geoData, wkrData,
   const vals = wkrData.map(d => {
     if (metric === 'share') return d.shares[party] || 0;
     if (metric === 'resid') return d.resid[party] || 0;
+    if (metric === 'swing') return (d.swing||{})[party] || 0;
     if (metric === 'turnout') return d.turnout || 0;
     return 0;
   });
   const mn = Math.min(...vals);
   const mx = Math.max(...vals);
   const range = mx - mn || 1;
-  const isDiverging = metric === 'resid';
+  const isDiverging = metric === 'resid' || metric === 'swing';
 
   // Rebuild each mesh
   for (const feat of geoData.features) {
@@ -97,6 +98,7 @@ export function updateMap(meshes, geoData, wkrData,
     if (d) {
       if (metric === 'share') v = d.shares[party] || 0;
       else if (metric === 'resid') v = d.resid[party] || 0;
+      else if (metric === 'swing') v = (d.swing||{})[party] || 0;
       else if (metric === 'turnout') v = d.turnout || 0;
     }
     const t = (v - mn) / range;

@@ -1,5 +1,5 @@
 // UI controls and info panel
-import { PARTIES, METRICS } from './data.js';
+import { PARTIES, METRICS, getShap } from './data.js';
 import { PARTY_COLORS } from './colors.js';
 
 export function initUI(onChange) {
@@ -45,7 +45,10 @@ export function showTooltip(x, y, wkrData, metric, party) {
   let val;
   if (metric === 'share') val = (wkrData.shares[party]||0).toFixed(1)+'%';
   else if (metric === 'resid') val = (wkrData.resid[party]||0).toFixed(2)+'pp';
-  else val = wkrData.turnout.toFixed(1) + '%';
+  else if (metric === 'swing') {
+    const sv = ((wkrData.swing||{})[party]||0);
+    val = (sv>0?'+':'') + sv.toFixed(2) + 'pp';
+  } else val = wkrData.turnout.toFixed(1) + '%';
   const lbl = metric === 'turnout' ? 'Turnout' : party;
   el.innerHTML = `<b>${wkrData.name}</b><br>${lbl}: ${val}`;
   el.style.left = (x + 15) + 'px';
@@ -86,6 +89,29 @@ export function showInfoPanel(d) {
     const sign = v > 0 ? '+' : '';
     html += `<div style="font-size:12px">${p}: `;
     html += `${sign}${v.toFixed(2)}</div>`;
+  }
+  // Swing section
+  if (d.swing && Object.keys(d.swing).length) {
+    html += '<h3 style="font-size:13px;margin:10px 0 6px">';
+    html += 'EW24→BTW25 Swing (pp)</h3>';
+    const sw = Object.entries(d.swing)
+      .sort((a,b) => b[1] - a[1]);
+    for (const [p, v] of sw) {
+      const s = v > 0 ? '+' : '';
+      html += `<div style="font-size:12px">${p}: `;
+      html += `${s}${v.toFixed(2)}</div>`;
+    }
+  }
+  // SHAP feature importance
+  const shap = getShap();
+  const state = getState();
+  if (shap && shap[state.party]) {
+    html += '<h3 style="font-size:13px;margin:10px 0 6px">';
+    html += 'Top Features (SHAP)</h3>';
+    for (const f of shap[state.party].slice(0, 5)) {
+      html += `<div style="font-size:12px">`
+        + `${f.feature}: ${f.shap.toFixed(3)}</div>`;
+    }
   }
   el.innerHTML = html;
   el.classList.remove('hidden');

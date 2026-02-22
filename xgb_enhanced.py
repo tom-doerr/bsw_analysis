@@ -3,6 +3,7 @@
 Predicts 2025 Zweitstimme share per party at precinct level."""
 
 import io
+import json
 import numpy as np
 import pandas as pd
 from pathlib import Path
@@ -12,6 +13,7 @@ from sklearn.metrics import r2_score, mean_absolute_error
 from sklearn.metrics import mean_squared_error
 from sklearn.model_selection import KFold, cross_val_predict
 from xgboost import XGBRegressor
+import shap
 
 from wahlbezirk_lr import (
     load_2025_wbz, load_2021_wbz, load_2017_wbz,
@@ -145,6 +147,52 @@ def compute_metrics(y, yp):
     }
 
 
+MAJOR = ["BSW", "AfD", "CDU", "SPD", "GRÜNE",
+         "Die Linke", "FDP", "CSU", "FREIE WÄHLER"]
+
+
+def _train_full(X, y):
+    mdl = XGBRegressor(
+        n_estimators=300, max_depth=6,
+        learning_rate=0.1, subsample=0.8,
+        colsample_bytree=0.8, random_state=SEED,
+        n_jobs=-1, tree_method="hist")
+    mdl.fit(X, y)
+    return mdl
+
+
+def _shap_values(mdl, X):
+    ex = shap.TreeExplainer(mdl)
+    return ex.shap_values(X)
+
+
+def _top_features(sv, names, k=20):
+    ma = np.abs(sv).mean(axis=0)
+    top = np.argsort(ma)[::-1][:k]
+    print(f"top={names[top[0]]} ({ma[top[0]]:.3f})",
+          flush=True)
+    return [{"feature": names[i],
+             "shap": round(float(ma[i]), 4)}
+            for i in top]
+
+
+def compute_shap_summary(X, z_map, feature_names):
+    """Train full models + SHAP for major parties."""
+    print(f"\n{'='*70}")
+    print("SHAP Analysis (major parties)")
+    print(f"{'='*70}", flush=True)
+    summary = {}
+    for party in MAJOR:
+        if party not in z_map:
+            continue
+        print(f"  {party}...", end=" ", flush=True)
+        mdl = _train_full(X, z_map[party])
+        sv = _shap_values(mdl, X)
+        summary[party] = _top_features(
+            sv, feature_names, 20)
+    return summary
+
+
 def main():
     X_df, z_map, meta = load_all()
     X = X_df.values.astype(np.float64)
@@ -204,6 +252,14 @@ def main():
     for rank, idx in enumerate(top):
         print(f"  {rank+1:2d}. {feature_names[idx]:40s}"
               f" {imp[idx]:.4f}")
+    # SHAP analysis
+    summary = compute_shap_summary(
+        X, z_map, np.array(feature_names))
+    out = Path("docs/data/shap_summary.json")
+    out.parent.mkdir(parents=True, exist_ok=True)
+    with open(out, "w") as f:
+        json.dump(summary, f, indent=2)
+    print(f"Wrote {out}")
 
 
 if __name__ == "__main__":

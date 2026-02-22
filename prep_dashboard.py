@@ -67,12 +67,25 @@ def load_residuals_by_wkr():
     return g.reset_index()
 
 
+def load_swing_by_wkr():
+    """Load WKR-level swing data if available."""
+    fp = DATA / "bsw_swing_wkr.csv"
+    if not fp.exists():
+        return None
+    return pd.read_csv(fp)
+
+
 def build_wkr_data():
     """Build wkr_data.json."""
     wkr, vcol = load_wkr_votes()
     resid = load_residuals_by_wkr()
     wkr = wkr.merge(resid, left_on="Wahlkreis-Nummer",
                      right_on="Wahlkreis", how="left")
+    swing = load_swing_by_wkr()
+    if swing is not None:
+        wkr = wkr.merge(swing, left_on="Wahlkreis-Nummer",
+                         right_on="Wahlkreis", how="left",
+                         suffixes=("", "_sw"))
     rows = []
     for _, r in wkr.iterrows():
         v = r[vcol]
@@ -98,6 +111,13 @@ def build_wkr_data():
             if rc in r.index and pd.notna(r[rc]):
                 resids[p] = round(float(r[rc]), 3)
         d["resid"] = resids
+        # Swing per party
+        swings = {}
+        for p in PARTIES:
+            sc = f"swing_{p}"
+            if sc in r.index and pd.notna(r[sc]):
+                swings[p] = round(float(r[sc]), 3)
+        d["swing"] = swings
         d["n_precincts"] = int(r.get("n_precincts", 0))
         rows.append(d)
     return rows

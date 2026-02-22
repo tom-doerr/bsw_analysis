@@ -30,7 +30,7 @@ def summary_json():
 def test_wkr_data_json_valid(wkr_json):
     assert len(wkr_json) == 299
     required = {"wkr", "name", "land", "turnout",
-                "shares", "resid"}
+                "shares", "resid", "swing"}
     for d in wkr_json:
         assert required <= set(d.keys())
 

@@ -48,7 +48,8 @@ def test_load_residuals_shape():
 def test_build_wkr_data_structure(wkr_data):
     assert len(wkr_data) == 299
     required = {"wkr", "name", "land", "turnout",
-                "valid", "shares", "resid", "n_precincts"}
+                "valid", "shares", "resid", "swing",
+                "n_precincts"}
     for d in wkr_data:
         assert required <= set(d.keys()), f"Missing keys in WKR {d.get('wkr')}"
 
@@ -74,6 +75,13 @@ def test_build_summary_structure():
     assert "n_precincts" in s
     for p in PARTIES:
         assert p in s["parties"], f"Missing party {p}"
+
+
+def test_wkr_swing_present(wkr_data):
+    has_swing = sum(1 for d in wkr_data
+                    if d.get("swing"))
+    assert has_swing >= 290, (
+        f"Only {has_swing}/299 WKR have swing data")
 
 
 def test_summary_r2_range():

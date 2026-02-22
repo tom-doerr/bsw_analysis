@@ -10,7 +10,11 @@ Repo: `~/git/bsw_analysis` (github.com/tom-doerr/bsw_analysis)
 - `bsw_bd_decorrelate.py` — BSW+BD sum decorrelation analysis
 - `bsw_forensic.py` — 11-test forensic battery for missing BSW votes
 - `bsw_claims_test.py` — Tests BSW's 4 specific claims about vote miscounting
-- `xgb_enhanced.py` — XGBoost + Europawahl 2024 + Strukturdaten
+- `xgb_enhanced.py` — XGBoost + EW24 + Strukturdaten + SHAP
+- `bsw_swing.py` — EW24→BTW25 swing analysis (Gemeinde)
+- `aggregate_swing_wkr.py` — Aggregate swing to Wahlkreis
+- `prep_dashboard.py` — Build JSON for Three.js dashboard
+- `generate_report.py` — HTML report with Plotly charts
 
 ## Data (`data/`)
 - `btw{25,21,17}_wbz.zip` — Precinct-level election results
@@ -56,6 +60,17 @@ Repo: `~/git/bsw_analysis` (github.com/tom-doerr/bsw_analysis)
 - Bezirksart: 0=Urne (66.5k), 5=Brief (28.6k), 6/8 rare
 - Briefwahl precincts have Wahlberechtigte=0
 - 80 columns total: geo IDs, voter counts, Erst/Zweit per party
+
+## Dashboard
+- Live: https://tom-doerr.github.io/bsw_analysis/
+- Report: https://tom-doerr.github.io/bsw_analysis/report.html
+- Three.js r170 (CDN), docs/ served by GitHub Pages
+- Metrics: vote share, residual, swing, turnout
+- SHAP top features shown in info panel on click
+
+## SHAP
+- BSW top SHAP: ew24_BSW (1.18), e25_Die Linke (0.56), e25_AfD (0.30)
+- shap_summary.json has top 20 features per party
 
 ## Gotchas
 - Zweitstimme shares sum to 100% → including other parties' z25 shares leaks
