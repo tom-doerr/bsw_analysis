@@ -1,5 +1,7 @@
 # BSW Analysis
 
+**[Live Dashboard](https://tom-doerr.github.io/bsw_analysis/)**
+
 Predicting 2025 Bundestagswahl Zweitstimme shares at polling
 station (Wahlbezirk) level using linear regression and XGBoost,
 plus comprehensive forensic analysis searching for evidence of
