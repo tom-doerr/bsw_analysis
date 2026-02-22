@@ -15,7 +15,7 @@ Included in `data/` (public government data):
 - `btw2025_strukturdaten.csv` — Sociodemographic data per Wahlkreis
 - `ew24_strukturdaten.csv` — EW24 Strukturdaten
 
-Source: [bundeswahlleiterin.de](https://www.bundeswahlleiterin.de)
+Datenquelle: © Die Bundeswahlleiterin, Wiesbaden 2025 ([bundeswahlleiterin.de](https://www.bundeswahlleiterin.de)), dl-de/by-2-0
 
 ## Scripts
 
