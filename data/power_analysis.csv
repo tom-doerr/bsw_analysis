@@ -1,0 +1,17 @@
+scenario,test,rate
+9529x1,skew,0.0
+9529x1,benford,0.0
+9529x1,geo,0.0
+9529x1,neg_frac,0.0
+1906x5,skew,0.75
+1906x5,benford,0.0
+1906x5,geo,0.0
+1906x5,neg_frac,0.0
+953x10,skew,0.9
+953x10,benford,0.0
+953x10,geo,0.0
+953x10,neg_frac,0.0
+95x100,skew,1.0
+95x100,benford,0.0
+95x100,geo,0.0
+95x100,neg_frac,0.0

@@ -208,7 +208,7 @@ def sec_claims():
     h = '<h2>BSW Claims Analysis</h2>'
     h += '<p>BSW got 4.981% (9,529 short).</p>'
     h += '<h3>1: BSW↔BD Ballot Confusion</h3>'
-    h += '<p>r=+0.004, no swap. Need 81% of BD.</p>'
+    h += '<p>r=+0.004, no swap. Need ~12.5% of BD.</p>'
     h += '<div class="verdict">No evidence.</div>'
     h += '<h3>2: Zero-Vote Precincts</h3>'
     h += '<p>Max +2,873 (&lt;9,529 needed).</p>'

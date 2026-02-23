@@ -30,7 +30,9 @@ Datenquelle: © Die Bundeswahlleiterin, Wiesbaden 2025 ([bundeswahlleiterin.de](
 - `bsw_claims_test.py` — Tests BSW's 4 specific claims about miscounting
 - `xgb_enhanced.py` — XGBoost + Europawahl 2024 + Strukturdaten
 - `bsw_evidence.py` — 7-analysis case for BSW crossing 5%
-- `panel_analysis.py` — Gemeinde-level 4-election panel (Die Linke→BSW flow)
+- `bsw_bayesian.py` — Bayesian posterior P(Δ≥9,529)
+- `bsw_power.py` — Power analysis for forensic battery
+- `panel_analysis.py` — Gemeinde-level 4-election panel
 
 ## Features
 
@@ -185,7 +187,7 @@ BSW got 4.981%, missing the 5% threshold by 9,529 votes.
 The party made four specific claims about vote miscounting:
 
 **Claim 1: BSW↔BD ballot confusion** — Residual correlation
-r=+0.004 (no anti-correlation). Would need 81% of ALL BD
+r=+0.004 (no anti-correlation). Would need ~12.5% of ALL BD
 votes transferred to reach 5%. **No evidence.**
 
 **Claim 2: Zero-vote precincts** — 481 BSW=0 Urne precincts
@@ -202,11 +204,22 @@ corrections went to BSW, but precincts were BSW-selected.
 
 ## Evidence Analysis: Case for BSW Crossing 5%
 
-Seven analyses estimating potential missing BSW votes
-(deficit: 9,529). Scenarios (effects overlap):
+Six counting-error mechanisms (visibility reported
+separately as counterfactual). Deficit: 9,529.
 - **Conservative** (zeros + small): 5,300
-- **Central** (25% recount + zeros + ZIP + Brief): 19,878
-- **Optimistic** (visibility + recount + BD + Brief): 49,353
+- **Central** (recount25% + zeros + ZIP + brief): 19,878
+- **Optimistic** (recount50% + BD + brief): 36,218
+
+### Bayesian Posterior
+
+Model B (selection-bias mixture): **P(Δ≥9,529) ≈ 25%**.
+Prior-insensitive across 3 priors. See `bsw_bayesian.py`.
+
+### Power Analysis
+
+Forensic battery **cannot detect** spread-thin miscounts
+(9,529×1: 0% detection). Only concentrated patterns
+(953×10) detected via skewness shift (90%).
 
 ## Usage
 
@@ -217,5 +230,7 @@ python3 bsw_bd_decorrelate.py   # decorrelation analysis
 python3 bsw_forensic.py         # forensic battery
 python3 bsw_claims_test.py      # BSW's specific claims
 python3 bsw_evidence.py         # evidence for crossing 5%
+python3 bsw_bayesian.py         # Bayesian posterior
+python3 bsw_power.py            # power analysis
 python3 panel_analysis.py       # Gemeinde panel analysis
 ```

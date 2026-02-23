@@ -10,7 +10,8 @@ from scipy import stats
 from scipy.stats import (spearmanr, pearsonr,
     chi2_contingency, poisson, mannwhitneyu)
 
-from wahlbezirk_lr import load_2025_wbz, LAND_CODE
+from wahlbezirk_lr import (load_2025_wbz, LAND_CODE,
+                           validate_totals)
 
 DATA = Path("data")
 SEP = "=" * 60
@@ -36,6 +37,7 @@ def load_all():
     pred = pd.read_csv(
         DATA / "wahlbezirk_lr_predictions.csv")
     assert len(df) == len(pred)
+    validate_totals(df)
     print(f"  {len(df)} precincts loaded")
     return df, pred
 
@@ -102,7 +104,7 @@ def claim1c_swap_sim(df, pred):
     """Move fraction f of BD→BSW, check if crosses 5%."""
     print(f"\n{SEP}\nCLAIM 1c: Vote-Swap Simulation\n{SEP}")
     bsw_tot = _votes(df, "BSW").sum()
-    bd_col = "Bündnis C - Zweitstimmen"
+    bd_col = f"{BD} - Zweitstimmen"
     bd_tot = pd.to_numeric(df[bd_col], errors="coerce").sum()
     total = _valid(df).sum()
     thr = total * 0.05
@@ -140,7 +142,7 @@ def claim2b_bd_in_zeros(df, pred):
     u = _urne(df)
     bsw0 = (_votes(df, "BSW").values == 0) & u
     bsw1 = (_votes(df, "BSW").values > 0) & u
-    bd_s = _share(df, "Bündnis C")
+    bd_s = _share(df, BD)
     m0, m1 = bd_s[bsw0].mean(), bd_s[bsw1].mean()
     print(f"  BD: BSW=0 {m0:.3f}% vs BSW>0 {m1:.3f}%"
           f" ({m0/m1:.2f}x)")

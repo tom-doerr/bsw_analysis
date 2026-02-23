@@ -16,7 +16,9 @@ Repo: `~/git/bsw_analysis` (github.com/tom-doerr/bsw_analysis)
 - `prep_dashboard.py` — Build JSON for Three.js dashboard
 - `generate_report.py` — HTML report with Plotly charts
 - `bsw_evidence.py` — 7-analysis case for BSW crossing 5%
-- `panel_analysis.py` — 4-election Gemeinde panel (Die Linke→BSW flow)
+- `bsw_bayesian.py` — Bayesian posterior P(Δ≥9,529)
+- `bsw_power.py` — Power analysis for forensic battery
+- `panel_analysis.py` — 4-election Gemeinde panel
 
 ## Data (`data/`)
 - `btw{25,21,17,13}_wbz.zip` — Precinct-level election results
@@ -53,15 +55,17 @@ Repo: `~/git/bsw_analysis` (github.com/tom-doerr/bsw_analysis)
 - East-West Brief/Urne split matches Die Linke pattern exactly
 
 ## BSW Claims Test Results
-- Claim 1 (BSW↔BD ballot swap): r=+0.004, no swap signature. Need 81% of ALL BD votes for 5%.
+- Claim 1 (BSW↔BD ballot swap): r=+0.004, no swap signature. Need ~12.5% of ALL BD votes for 5%.
 - Claim 2 (zero-vote precincts): 481 zeros (1.41x expected), max impact +2,873 votes (< 9,529 needed)
 - Claim 3 (extrapolation from 50 recounts): sample biased (BSW-selected), not representative
 - Claim 4 (disproportionate corrections): selection bias makes analysis uninformative
 
 ## BSW Evidence Analysis (case for 5%)
-- 7 analyses: visibility, recount MC, BD adjacency, excess zeros, ZIP, small-precinct, Briefwahl
-- Conservative: 5.3k, Central: 19.9k, Optimistic: 49.4k
-- Briefwahl: BSW gap mean +0.16pp, anomaly -0.56pp (less than controls)
+- Counterfactual (visibility): 131k, reported separately
+- 6 counting-error mechanisms: recount, BD, zeros, ZIP, small, brief
+- Conservative: 5.3k, Central: 19.9k, Optimistic: 36.2k
+- Bayesian posterior P(≥9,529): ~25% (mixture model)
+- Power: forensic battery cannot detect 9,529×1 miscount (0%)
 
 ## Panel Analysis (4-election Gemeinde tracking)
 - 7,766 Gemeinden matched across 2013/17/21/25

@@ -134,6 +134,34 @@ def cols_25(df):
     return erst, zweit
 
 
+OFFICIAL_Z25 = {"BSW": 2_472_947,
+    "BÜNDNIS DEUTSCHLAND": 76_372,
+    "Gültige": 49_649_512}
+
+
+def validate_totals(df):
+    """Check 2025 data integrity."""
+    _,zc=cols_25(df)
+    for c in zc:
+        df[c]=pd.to_numeric(df[c],errors="coerce").fillna(0)
+    gz=pd.to_numeric(df["Gültige - Zweitstimmen"],
+        errors="coerce").fillna(0)
+    bad=(df[zc].sum(axis=1)-gz).abs()>1
+    if bad.sum():
+        print(f"  WARN: {bad.sum()} sum errors")
+    for k,exp in OFFICIAL_Z25.items():
+        if k=="Gültige": a=gz.sum()
+        else: a=pd.to_numeric(df[
+            f"{k} - Zweitstimmen"],
+            errors="coerce").sum()
+        d=abs(a-exp)/exp*100
+        if d>0.1:
+            print(f"  WARN:{k}:{a:,.0f}vs{exp:,}")
+    neg=df[zc].lt(0).any(axis=1).sum()
+    if neg: print(f"  WARN: {neg} neg rows")
+    print(f"  Validated {len(df)} rows")
+
+
 def cols_21(df):
     """Extract 2021 E_/Z_ party column lists."""
     erst = [c for c in df.columns if c.startswith("E_")

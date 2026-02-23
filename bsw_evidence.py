@@ -9,7 +9,8 @@ from pathlib import Path
 from scipy import stats
 from scipy.stats import pearsonr, poisson
 
-from wahlbezirk_lr import load_2025_wbz, LAND_CODE
+from wahlbezirk_lr import (load_2025_wbz, LAND_CODE,
+                           validate_totals)
 
 DATA = Path("data")
 SEP = "=" * 60
@@ -33,6 +34,7 @@ def load_all():
     pred = pd.read_csv(
         DATA / "wahlbezirk_lr_predictions.csv")
     assert len(df) == len(pred)
+    validate_totals(df)
     print(f"  {len(df)} precincts loaded")
     return df, pred
 
@@ -57,11 +59,13 @@ def _urne(df):
     return df["Bezirksart"] == 0
 
 
-def analysis1_erst_zweit_gap(df):
-    """Ballot visibility: BSW Zweit performance in Erst
-    coverage vs non-coverage areas."""
+def counterfactual_visibility(df):
+    """COUNTERFACTUAL: Ballot visibility effect.
+    NOT a counting error — estimates votes BSW would
+    have gained with full Erststimme coverage."""
     print(f"\n{SEP}")
-    print("ANALYSIS 1: Ballot Visibility Effect")
+    print("COUNTERFACTUAL: Ballot Visibility Effect")
+    print("(NOT a counting error — campaign effect)")
     print(SEP)
     df["Land"] = pd.to_numeric(df["Land"], errors="coerce")
     erst_bsw = _votes(df, "BSW", "Erststimmen").values
@@ -108,11 +112,11 @@ def analysis1_erst_zweit_gap(df):
     return total_lost
 
 
-def analysis2_recount_mc(df):
-    """Monte Carlo extrapolation from BSW's 50 recounts
+def mechanism1_recount_mc(df):
+    """Recount extrapolation from BSW's 50 recounts
     that found +0.3 extra votes/precinct on average."""
     print(f"\n{SEP}")
-    print("ANALYSIS 2: Recount Monte Carlo")
+    print("MECHANISM 1: Recount Monte Carlo")
     print(SEP)
     n_recounts = 50
     mean_gain = 0.3
@@ -148,11 +152,11 @@ def analysis2_recount_mc(df):
             "results": results}
 
 
-def analysis3_bd_adjacency(df, pred):
-    """BD ballot-adjacency effect by Land. BSW(26) and
-    BD(27) are adjacent on ballot."""
+def mechanism2_bd_adjacency(df, pred):
+    """BD ballot-adjacency misattribution by Land.
+    BSW(26) and BD(27) adjacent on ballot."""
     print(f"\n{SEP}")
-    print("ANALYSIS 3: BD Ballot-Adjacency by Land")
+    print("MECHANISM 2: BD Ballot-Adjacency by Land")
     print(SEP)
     bd_s = _share(df, BD)
     bsw_r = pred["BSW_resid"].values
@@ -180,11 +184,11 @@ def analysis3_bd_adjacency(df, pred):
     return bd_total
 
 
-def analysis4_excess_zeros(df, pred):
-    """Quantify missing votes from excess BSW=0 precincts
+def mechanism3_excess_zeros(df, pred):
+    """Missing votes from excess BSW=0 precincts
     beyond Poisson expectation."""
     print(f"\n{SEP}")
-    print("ANALYSIS 4: Excess Zero Impact")
+    print("MECHANISM 3: Excess Zero Impact")
     print(SEP)
     u = _urne(df)
     g = _valid(df)
@@ -219,11 +223,11 @@ def analysis4_excess_zeros(df, pred):
     return missing_excess
 
 
-def analysis5_zip_model(df, pred):
-    """Manual Zero-Inflated Poisson via EM algorithm.
+def mechanism4_zip_model(df, pred):
+    """Zero-Inflated Poisson via EM algorithm.
     Estimate structural zero probability π."""
     print(f"\n{SEP}")
-    print("ANALYSIS 5: Zero-Inflated Poisson Model")
+    print("MECHANISM 4: Zero-Inflated Poisson Model")
     print(SEP)
     u = _urne(df); g = _valid(df)
     results = {}
@@ -256,11 +260,10 @@ def analysis5_zip_model(df, pred):
     return missing
 
 
-def analysis6_small_precinct(df, pred):
-    """Stratify by precinct size: do small precincts
-    show systematic negative BSW residuals?"""
+def mechanism5_small_precinct(df, pred):
+    """Small-precinct systematic BSW residual bias."""
     print(f"\n{SEP}")
-    print("ANALYSIS 6: Small-Precinct Bias")
+    print("MECHANISM 5: Small-Precinct Bias")
     print(SEP)
     g = _valid(df); bsw_r = pred["BSW_resid"].values
     qs = pd.qcut(g, 5, labels=False, duplicates="drop")
@@ -309,10 +312,10 @@ def _brief_gaps(df):
     return {p:np.array(v) for p,v in gaps.items()},np.array(bv),ids
 
 
-def analysis7_brief_urne(df, pred):
-    """Briefwahl vs Urne deep dive."""
+def mechanism6_brief_urne(df, pred):
+    """Briefwahl vs Urne gap anomaly."""
     print(f"\n{SEP}")
-    print("ANALYSIS 7: Briefwahl Deep Dive")
+    print("MECHANISM 6: Briefwahl Deep Dive")
     print(SEP)
     gaps, bv, ids = _brief_gaps(df)
     bg = gaps["BSW"]
@@ -338,12 +341,17 @@ def analysis7_brief_urne(df, pred):
     return missing
 
 
-def summary(results):
-    """Aggregate all analyses into a summary table."""
+def summary(cf_result, results):
+    """Separate counterfactual from mechanisms."""
     print(f"\n{'#' * 60}")
-    print("SUMMARY: Estimated Missing BSW Votes")
+    print("COUNTERFACTUAL (not counting errors)")
     print('#' * 60)
-    names = ["Erst-Zweit Gap", "Recount Extrapolation",
+    print(f"  Ballot Visibility: {cf_result:>12,.0f}")
+    print("  (Campaign effect, not fraud evidence)")
+    print(f"\n{'#' * 60}")
+    print("COUNTING-ERROR MECHANISMS")
+    print('#' * 60)
+    names = ["Recount Extrapolation",
              "BD Adjacency (10%)", "Excess Zeros",
              "ZIP Model", "Small-Precinct Bias",
              "Briefwahl Gap"]
@@ -359,16 +367,18 @@ def summary(results):
     print(f"  {'BSW deficit':<25} {BSW_DEFICIT:>12,}")
     print(f"  {'Surplus':<25} "
           f"{total - BSW_DEFICIT:>+12,.0f}")
-    # Scenarios (effects overlap, not additive)
-    cons = results[3]+results[5]  # zeros+small
-    cent = results[1]*0.25+results[3]+results[4]+results[6]*0.5
-    opt = results[0]*0.1+results[1]*0.5+results[2]+results[6]
+    # Scenarios (counting-error only, no visibility)
+    cons = results[2]+results[4]  # zeros+small
+    cent = results[0]*0.25+results[2]+results[3]+results[5]*0.5
+    opt = results[0]*0.5+results[1]+results[5]
     print(f"\n  Scenarios (non-additive):")
     for nm,v in [("Conservative",cons),
                  ("Central",cent),("Optimistic",opt)]:
         s = "YES" if v >= BSW_DEFICIT else "NO"
         print(f"    {nm}: {v:>10,.0f} ({s})")
     print(f"    Deficit: {BSW_DEFICIT:>10,}")
+    rows.insert(0, {"analysis": "COUNTERFACTUAL: Visibility",
+                     "votes": cf_result})
     out = pd.DataFrame(rows)
     out.to_csv(DATA/"bsw_evidence_summary.csv",
                index=False)
@@ -378,16 +388,15 @@ def summary(results):
 
 def main():
     df, pred = load_all()
-    r1 = analysis1_erst_zweit_gap(df)
-    r2_data = analysis2_recount_mc(df)
-    r2 = r2_data["raw_median"]
-    r3 = analysis3_bd_adjacency(df, pred)
-    r3_10pct = r3 * 0.10  # 10% of BD
-    r4 = analysis4_excess_zeros(df, pred)
-    r5 = analysis5_zip_model(df, pred)
-    r6 = analysis6_small_precinct(df, pred)
-    r7 = analysis7_brief_urne(df, pred)
-    summary([r1, r2, r3_10pct, r4, r5, r6, r7])
+    cf = counterfactual_visibility(df)
+    r1d = mechanism1_recount_mc(df)
+    r1 = r1d["raw_median"]
+    r2 = mechanism2_bd_adjacency(df, pred)*0.10
+    r3 = mechanism3_excess_zeros(df, pred)
+    r4 = mechanism4_zip_model(df, pred)
+    r5 = mechanism5_small_precinct(df, pred)
+    r6 = mechanism6_brief_urne(df, pred)
+    summary(cf, [r1, r2, r3, r4, r5, r6])
 
 
 if __name__ == "__main__":
