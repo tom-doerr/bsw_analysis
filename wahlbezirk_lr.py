@@ -83,6 +83,30 @@ def load_2017_wbz():
     return erst, zweit
 
 
+def load_2013_csv(zf, name):
+    """Load one 2013 CSV (UTF-8-sig, skiprows=4)."""
+    with zf.open(name) as fh:
+        raw = fh.read().decode("utf-8-sig")
+    df = pd.read_csv(io.StringIO(raw), sep=";",
+        skiprows=4, quotechar='"', low_memory=False)
+    df["Wahlkreis"] = pd.to_numeric(
+        df["Wahlkreis"].astype(str).str.strip('"'),
+        errors="coerce")
+    df = df.dropna(subset=["Wahlkreis"])
+    df["Wahlkreis"] = df["Wahlkreis"].astype(int)
+    return df
+
+
+def load_2013_wbz():
+    zp = DATA / "btw13_wbz.zip"
+    with ZipFile(zp) as zf:
+        e = load_2013_csv(zf,
+            "BTW13_Erststimmen_Wahlbezirke.csv")
+        z = load_2013_csv(zf,
+            "BTW13_Zweitstimmen_Wahlbezirke.csv")
+    return e, z
+
+
 def agg_to_wkr(df, vote_cols, wkr_col="Wahlkreis"):
     """Aggregate vote columns to Wahlkreis level."""
     num = df[[wkr_col] + vote_cols].copy()

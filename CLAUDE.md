@@ -15,10 +15,11 @@ Repo: `~/git/bsw_analysis` (github.com/tom-doerr/bsw_analysis)
 - `aggregate_swing_wkr.py` — Aggregate swing to Wahlkreis
 - `prep_dashboard.py` — Build JSON for Three.js dashboard
 - `generate_report.py` — HTML report with Plotly charts
-- `bsw_evidence.py` — 6-analysis case for BSW crossing 5%
+- `bsw_evidence.py` — 7-analysis case for BSW crossing 5%
+- `panel_analysis.py` — 4-election Gemeinde panel (Die Linke→BSW flow)
 
 ## Data (`data/`)
-- `btw{25,21,17}_wbz.zip` — Precinct-level election results
+- `btw{25,21,17,13}_wbz.zip` — Precinct-level election results
 - `ew24_wbz.zip` — Europawahl 2024 precinct results (BSW included)
 - `btw2025_strukturdaten.csv` — Sociodemographic data per Wahlkreis
 - `ew24_strukturdaten.csv` — EW24 Strukturdaten
@@ -58,10 +59,15 @@ Repo: `~/git/bsw_analysis` (github.com/tom-doerr/bsw_analysis)
 - Claim 4 (disproportionate corrections): selection bias makes analysis uninformative
 
 ## BSW Evidence Analysis (case for 5%)
-- 6 analyses: visibility, recount MC, BD adjacency, excess zeros, ZIP, small-precinct
-- Conservative: 5.3k votes (insufficient), Central: 12.6k (sufficient), Optimistic: 34.7k
-- BSW Erst coverage: 6/16 Länder, within-Land visibility boost in NW/BE
-- ZIP: BSW π=0.0072 vs controls π=0.0045, excess structural zeros ~187
+- 7 analyses: visibility, recount MC, BD adjacency, excess zeros, ZIP, small-precinct, Briefwahl
+- Conservative: 5.3k, Central: 19.9k, Optimistic: 49.4k
+- Briefwahl: BSW gap mean +0.16pp, anomaly -0.56pp (less than controls)
+
+## Panel Analysis (4-election Gemeinde tracking)
+- 7,766 Gemeinden matched across 2013/17/21/25
+- r(Linke_drop, BSW) = 0.684, BSW = 5.00+0.48×drop
+- East surplus, West deficit pattern in BSW vs prediction
+- 2013 data: UTF-8-sig encoding, bare party names
 
 ## Data Columns (raw 2025)
 - Bezirksart: 0=Urne (66.5k), 5=Brief (28.6k), 6/8 rare

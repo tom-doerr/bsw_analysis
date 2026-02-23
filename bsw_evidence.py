@@ -289,6 +289,55 @@ def analysis6_small_precinct(df, pred):
     return under
 
 
+def _brief_gaps(df):
+    """Per-WKR Urne-Brief share gaps for BSW+controls."""
+    gz=_valid(df)
+    wkr=pd.to_numeric(df["Wahlkreis"],errors="coerce")
+    ba=df["Bezirksart"].values
+    u=ba==0;b=ba==5
+    ps=["BSW"]+CONTROLS
+    gaps={p:[] for p in ps};ids=[];bv=[]
+    for w in sorted(wkr.dropna().unique()):
+        m=wkr==w;mu=m&u;mb=m&b
+        if mu.sum()<5 or mb.sum()<5: continue
+        ids.append(w);bv.append(gz[mb].sum())
+        for p in ps:
+            s=_share(df,p)
+            gaps[p].append(
+                np.average(s[mu],weights=gz[mu])
+                -np.average(s[mb],weights=gz[mb]))
+    return {p:np.array(v) for p,v in gaps.items()},np.array(bv),ids
+
+
+def analysis7_brief_urne(df, pred):
+    """Briefwahl vs Urne deep dive."""
+    print(f"\n{SEP}")
+    print("ANALYSIS 7: Briefwahl Deep Dive")
+    print(SEP)
+    gaps, bv, ids = _brief_gaps(df)
+    bg = gaps["BSW"]
+    print(f"  {len(ids)} WKR with Brief+Urne data")
+    print(f"  BSW Urne-Brief gap: "
+          f"mean={bg.mean():+.3f}pp")
+    for p in CONTROLS:
+        print(f"  {p} gap: "
+              f"mean={gaps[p].mean():+.3f}pp")
+    # Anomaly: BSW gap minus avg control gap
+    ctrl_avg = np.mean([gaps[c] for c in CONTROLS], axis=0)
+    anomaly = bg - ctrl_avg
+    print(f"  BSW anomaly (gap-controls): "
+          f"mean={anomaly.mean():+.3f}pp")
+    # Missing votes: where BSW gap is anomalously positive
+    # (Urne > Brief more than controls)
+    pos = anomaly > 0
+    missing = (anomaly[pos]/100 * bv[pos]).sum()
+    print(f"  WKR with positive anomaly: "
+          f"{pos.sum()}/{len(ids)}")
+    print(f"  Est missing Brief votes: "
+          f"{missing:,.0f}")
+    return missing
+
+
 def summary(results):
     """Aggregate all analyses into a summary table."""
     print(f"\n{'#' * 60}")
@@ -296,7 +345,8 @@ def summary(results):
     print('#' * 60)
     names = ["Erst-Zweit Gap", "Recount Extrapolation",
              "BD Adjacency (10%)", "Excess Zeros",
-             "ZIP Model", "Small-Precinct Bias"]
+             "ZIP Model", "Small-Precinct Bias",
+             "Briefwahl Gap"]
     rows = []
     print(f"\n  {'Analysis':<25} {'Est. Votes':>12}")
     print(f"  {'-'*25} {'-'*12}")
@@ -310,9 +360,9 @@ def summary(results):
     print(f"  {'Surplus':<25} "
           f"{total - BSW_DEFICIT:>+12,.0f}")
     # Scenarios (effects overlap, not additive)
-    cons = results[3] + results[5]  # zeros+small
-    cent = results[1]*0.25 + results[3] + results[4]
-    opt = results[0]*0.1+results[1]*0.5+results[2]
+    cons = results[3]+results[5]  # zeros+small
+    cent = results[1]*0.25+results[3]+results[4]+results[6]*0.5
+    opt = results[0]*0.1+results[1]*0.5+results[2]+results[6]
     print(f"\n  Scenarios (non-additive):")
     for nm,v in [("Conservative",cons),
                  ("Central",cent),("Optimistic",opt)]:
@@ -336,7 +386,8 @@ def main():
     r4 = analysis4_excess_zeros(df, pred)
     r5 = analysis5_zip_model(df, pred)
     r6 = analysis6_small_precinct(df, pred)
-    summary([r1, r2, r3_10pct, r4, r5, r6])
+    r7 = analysis7_brief_urne(df, pred)
+    summary([r1, r2, r3_10pct, r4, r5, r6, r7])
 
 
 if __name__ == "__main__":
