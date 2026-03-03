@@ -33,6 +33,11 @@ Datenquelle: © Die Bundeswahlleiterin, Wiesbaden 2025 ([bundeswahlleiterin.de](
 - `bsw_bayesian.py` — Bayesian posterior P(Δ≥9,529)
 - `bsw_power.py` — Power analysis for forensic battery
 - `panel_analysis.py` — Gemeinde-level 4-election panel
+- `evidence_registry.py` — Suspicious precinct registry with anomaly scores
+- `bsw_recount_bias.py` — Recount selection-bias sensitivity analysis
+- `bsw_adjacency_did.py` — Ballot adjacency natural experiment
+- `bsw_generative.py` — Latent-variable generative model (no double-counting)
+- `bsw_affidavits.py` — Sworn statement cross-reference
 
 ## Features
 
@@ -221,6 +226,32 @@ Forensic battery **cannot detect** spread-thin miscounts
 (9,529×1: 0% detection). Only concentrated patterns
 (953×10) detected via skewness shift (90%).
 
+## Evidence Registry
+
+5,400 flagged precincts from 95k, by 4 anomaly criteria.
+239 BSW=0 in flagged set, 104 suspicious (P<1%).
+Top: HE WKR 168 (BD z=+26), BY WKR 221 (BD z=+26),
+SN WKR 157 Reinhardtsdorf (BD=12, BSW=0, P=1.6×10⁻⁵).
+All 3 known filing cases matched with all 4 flags.
+
+## Recount Bias: Sensitivity Curve
+
+Rate θ=0.304 [0.18, 0.48]. If recounts represent only the
+104 suspicious precincts: ~289 votes (P=0%). Need f≥20%
+representativeness for any chance. f=30%: P=35.6%.
+
+## Ballot Adjacency Natural Experiment
+
+Anomalies **lower** where BSW has Erst (ratio 0.43).
+BSW=0 concentrates in small precincts (471/517 in Q0).
+FDP↔FW has more zero-neighbor cases than BSW↔BD.
+Pattern consistent with Poisson noise, not confusion.
+
+## Generative Model (no double-counting)
+
+Swap + zero-out channels. Conservative: med=1,832, P=0%.
+Bias-adjusted (10% problem): med=7,175, **P=34%**.
+
 ## Usage
 
 ```
@@ -233,4 +264,9 @@ python3 bsw_evidence.py         # evidence for crossing 5%
 python3 bsw_bayesian.py         # Bayesian posterior
 python3 bsw_power.py            # power analysis
 python3 panel_analysis.py       # Gemeinde panel analysis
+python3 evidence_registry.py   # build precinct registry
+python3 bsw_recount_bias.py    # recount bias analysis
+python3 bsw_adjacency_did.py   # adjacency DiD
+python3 bsw_generative.py      # generative model
+python3 bsw_affidavits.py      # affidavit cross-reference
 ```

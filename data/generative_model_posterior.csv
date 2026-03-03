@@ -1,0 +1,4 @@
+model,median,ci5,ci95,p_cross
+conservative,1832.0,1592.0,2078.0,0.0
+full_uniform,29729.5,19306.0,43459.0,1.0
+bias_adjusted,7175.0,2607.9500000000003,21765.0,0.33988

@@ -19,6 +19,11 @@ Repo: `~/git/bsw_analysis` (github.com/tom-doerr/bsw_analysis)
 - `bsw_bayesian.py` — Bayesian posterior P(Δ≥9,529)
 - `bsw_power.py` — Power analysis for forensic battery
 - `panel_analysis.py` — 4-election Gemeinde panel
+- `evidence_registry.py` — Suspicious precinct registry
+- `bsw_recount_bias.py` — Recount selection-bias analysis
+- `bsw_adjacency_did.py` — Ballot adjacency DiD
+- `bsw_generative.py` — Latent-variable generative model
+- `bsw_affidavits.py` — Sworn statement cross-reference
 
 ## Data (`data/`)
 - `btw{25,21,17,13}_wbz.zip` — Precinct-level election results
@@ -66,6 +71,35 @@ Repo: `~/git/bsw_analysis` (github.com/tom-doerr/bsw_analysis)
 - Conservative: 5.3k, Central: 19.9k, Optimistic: 36.2k
 - Bayesian posterior P(≥9,529): ~25% (mixture model)
 - Power: forensic battery cannot detect 9,529×1 miscount (0%)
+
+## Evidence Registry
+- 5,400 flagged precincts (of 95k) by 4 criteria
+- 239 BSW=0 in flagged, 104 suspicious (P<1%)
+- 3 known cases matched with all 4 flags
+- Output: data/evidence_registry.csv + .json
+
+## Recount Bias Analysis
+- Rate θ=0.304 [0.177, 0.481] from Gamma posterior
+- 104 suspicious precincts only → ~289 votes
+- Need f≥20% representativeness for crossing chance
+- f=30%: P=35.6%, f=50%: P=93.9%
+
+## Adjacency DiD
+- Anomalies LOWER where BSW has Erst (ratio 0.43)
+- BSW=0 5.76x more in Urne vs Brief (size effect)
+- FDP↔FW has more zero-with-neighbor than BSW↔BD
+- 471/517 BSW=0 in smallest quintile (Poisson noise)
+- Residuals more negative in Erst WKRs (t=-21.4)
+
+## Generative Model
+- Swap+zeroout channels, no double-counting
+- Conservative: med=1,832, P=0%
+- Bias-adjusted (10% problem): med=7,175, P=34%
+
+## Affidavit Analysis
+- 3 matched: 99.9-100th pct BD within Land
+- P(BSW=0) 10^-15 to 10^-5, all in registry
+- Affidavit BD 17.3x higher than avg BSW=0
 
 ## Panel Analysis (4-election Gemeinde tracking)
 - 7,766 Gemeinden matched across 2013/17/21/25
