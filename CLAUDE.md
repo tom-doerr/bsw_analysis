@@ -28,8 +28,10 @@ Repo: `~/git/bsw_analysis` (github.com/tom-doerr/bsw_analysis)
 - `calibrate_zero_betabinom.py` — Beta-Binomial zero calibration (model uncertainty)
 - `triangulate_lr_xgb.py` — LR vs XGB suspicious precinct overlap
 - `latent_class_pi.py` — EM latent-class π inference from flags
-- `clustering_test.py` — Geographic clustering permutation tests
+- `clustering_test.py` — Geographic clustering + conditional permutation
 - `brief_colocation.py` — Briefwahl gap co-location with registry
+- `bb_utils.py` — Shared BB p0 and rho estimation
+- `top_anomalies_bb.py` — Top 200 BB-surviving anomaly case file
 
 ## Data (`data/`)
 - `btw{25,21,17,13}_wbz.zip` — Precinct-level election results
@@ -79,15 +81,16 @@ Repo: `~/git/bsw_analysis` (github.com/tom-doerr/bsw_analysis)
 - Power: forensic battery cannot detect 9,529×1 miscount (0%)
 
 ## Evidence Registry
-- 3,735 flagged precincts by 4 criteria (Binomial P(0), BD rank pctile)
-- missing_votes col, sorted descending; calibration per Land
-- BY +64, NI +36, HE +29 excess zeros
+- 3,722 flagged precincts by 4 criteria (BB P(0), BD rank pctile)
+- Now uses Beta-Binomial p0 via bb_utils
+- BB-calibrated excess: HE +19.4, NI +18.0, BY +3.9
 - Output: data/evidence_registry.csv + .json
 
 ## Recount Bias Analysis
 - Rate θ=0.304 [0.177, 0.481] from Gamma posterior
-- 104 suspicious precincts only → ~31 votes (P=0%)
-- Need f≥20% representativeness for crossing chance
+- 74 BB-suspicious precincts → ~22 votes (P=0%)
+- Selection bias: susp λ=13.5 vs all λ=25.9 (KS p<1e-12)
+- 0/74 suspicious above 90th λ percentile
 - f=30%: P=35.5%, f=50%: P=94.1%
 
 ## Adjacency DiD
@@ -103,8 +106,8 @@ Repo: `~/git/bsw_analysis` (github.com/tom-doerr/bsw_analysis)
 - π sweep: P(≥9529) crosses 50% at π≈20%
 
 ## Zero Calibration
-- Excess zeros in λ=1-20 range
-- BY +64, NI +36, HE +29 excess zeros per Land
+- Excess zeros in λ=10-50 range (survive BB calibration)
+- BB-adjusted: HE +19.4, NI +18.0, BY +3.9
 
 ## Beta-Binomial Zero Calibration (v2)
 - ρ=0.002712 (2x overdispersion vs Binomial)
@@ -113,18 +116,33 @@ Repo: `~/git/bsw_analysis` (github.com/tom-doerr/bsw_analysis)
 - FDP/Linke show negative excess (BSW-specific)
 
 ## LR vs XGB Triangulation
+- Uses estimated ρ from bb_utils (not hardcoded)
 - 71% Jaccard overlap of suspicious precincts
 - Spearman ρ=0.898, Top-20: 80%, Top-50: 92%
-- Total missing: LR 2,054 vs XGB 1,986
+
+## Pipeline Consistency (v3)
+- All scripts use bb_utils.estimate_rho + bb_p0
+- Shared module: bb_utils.py
+- Updated: registry, latent_class, triangulation,
+  clustering, brief_colocation, recount_bias
+
+## Top BB Anomalies Case File
+- 74 BB-suspicious BSW=0 precincts
+- Total expected missing: 995 votes
+- Concentrated in λ=10-50 range
+- Output: data/top_anomalies_bb.csv
 
 ## Latent-Class π Inference
-- EM: π=2.04% [1.89%, 2.18%] problem precincts
-- Sensitivity: zero=5.6%, resid=58.3%
-- E[problem]=1,934; P(cross)=30.3%
+- Continuous Gaussian EM (not binary), identifiable
+- π=24.4% [23.9%, 24.9%] anomalous component
+- μ(-log10 p0): prob=11.67, norm=5.30
+- P(cross)=92.5% (high π drives this)
 
 ## Geographic Clustering
-- BY: 51/108 suspicious (0.28%, highest)
-- WKR clustering p=0.017, Land p<0.001
+- BB-calibrated: 74 suspicious (was 108 with Binomial)
+- BY: 35/74 (0.19%), unconditional Land p<0.001
+- WKR unconditional p=0.046, **conditional p=0.383**
+- Conditional perm (Land×λ strata) removes clustering
 - Top: Rieneck(38), Flensburg(35), Wedel(34)
 
 ## Briefwahl Co-Location

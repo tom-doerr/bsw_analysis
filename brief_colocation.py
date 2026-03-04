@@ -8,6 +8,7 @@ import numpy as np
 import pandas as pd
 from pathlib import Path
 from scipy import stats
+from bb_utils import estimate_rho, bb_p0
 
 DATA = Path("data")
 SEP = "=" * 60
@@ -52,7 +53,8 @@ def flag_registry(df, pred):
     """Flag suspicious precincts (same as registry)."""
     g=_g(df); bsw=_v(df,"BSW").values
     bp=np.clip(pred["BSW_pred"].values/100,1e-8,1-1e-8)
-    p0=np.power(1-bp,g)
+    rho=estimate_rho(pred, g)
+    p0=bb_p0(g, bp, rho)
     susp=(bsw==0)&(p0<0.01)
     bd=_v(df,BD).values
     hi_bd=(bsw==0)&(bd>5)

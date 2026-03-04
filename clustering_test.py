@@ -7,6 +7,7 @@ import numpy as np
 import pandas as pd
 from pathlib import Path
 from collections import Counter
+from bb_utils import estimate_rho, bb_p0
 
 DATA = Path("data")
 SEP = "=" * 60
@@ -38,7 +39,8 @@ def flag_suspicious(df, pred):
         errors="coerce").fillna(0).values
     bp = np.clip(pred["BSW_pred"].values/100,
                  1e-8, 1-1e-8)
-    p0 = np.power(1-bp, g)
+    rho = estimate_rho(pred, g)
+    p0 = bb_p0(g, bp, rho)
     susp = (bsw == 0) & (p0 < 0.01)
     miss = np.where(bsw == 0, bp*g, 0)
     return susp, miss
@@ -133,6 +135,32 @@ def by_bezirksart(susp, ba):
               f"{ns:>5}/{nt:>6} ({r:.2f}%)")
 
 
+def strat_perm(susp, groups, strata, n_perm=5000):
+    """Conditional perm: shuffle within strata."""
+    rng=np.random.RandomState(42)
+    ug=np.unique(groups); n=len(susp)
+    obs_max=max(susp[groups==g].sum() for g in ug)
+    us=np.unique(strata); exceed=0
+    si={s:np.where(strata==s)[0] for s in us}
+    for _ in range(n_perm):
+        p=np.zeros(n,dtype=bool)
+        for s in us:
+            ix=si[s]; ns_s=int(susp[ix].sum())
+            if 0<ns_s<len(ix):
+                sel=rng.choice(len(ix),ns_s,False)
+                p[ix[sel]]=True
+        mx=max(p[groups==g].sum() for g in ug)
+        if mx>=obs_max: exceed+=1
+    return obs_max, exceed/n_perm
+
+
+def make_strata(ln, lam):
+    """Land × λ-bin strata."""
+    bs=[0,3,10,20,50,np.inf]
+    lb=np.clip(np.digitize(lam,bs)-1,0,4)
+    return np.array([f"{l}_{b}" for l,b in zip(ln,lb)])
+
+
 def main():
     df,pred=load_all()
     susp,miss=flag_suspicious(df,pred)
@@ -141,18 +169,28 @@ def main():
     tg=top_gemeinden(susp,miss,gem,ln)
     tw=top_wahlkreise(susp,miss,wkr)
     by_land(susp,ln); by_bezirksart(susp,ba)
-    # Permutation tests
-    print(f"\n{SEP}\nPERMUTATION TESTS\n{SEP}")
-    print("  WKR clustering (5000 perms)...")
+    print(f"\n{SEP}\nPERM (unconditional)\n{SEP}")
+    print("  WKR (5000)...")
     mx_w,p_w=perm_test(susp,wkr)
     print(f"  WKR: max={mx_w}, p={p_w:.4f}")
-    print("  Land clustering...")
+    print("  Land...")
     mx_l,p_l=perm_test(susp,ln)
     print(f"  Land: max={mx_l}, p={p_l:.4f}")
-    _save(tg,tw,mx_w,p_w,mx_l,p_l)
+    _run_cond(df,pred,susp,wkr,ln,tg,tw,mx_w,p_w,mx_l,p_l)
 
 
-def _save(tg,tw,mx_w,p_w,mx_l,p_l):
+def _run_cond(df,pred,susp,wkr,ln,tg,tw,mx_w,p_w,mx_l,p_l):
+    g=df["Gültige - Zweitstimmen"].values.astype(float)
+    bp=np.clip(pred["BSW_pred"].values/100,1e-8,1-1e-8)
+    st=make_strata(ln,bp*g)
+    print(f"\n{SEP}\nCOND PERM (Land×λ strata)\n{SEP}")
+    print("  WKR|strata (5000)...")
+    mx_c,p_c=strat_perm(susp,wkr,st)
+    print(f"  WKR|strata: max={mx_c}, p={p_c:.4f}")
+    _save(tg,tw,mx_w,p_w,mx_l,p_l,mx_c,p_c)
+
+
+def _save(tg,tw,mx_w,p_w,mx_l,p_l,mx_c=0,p_c=1):
     rows=[]
     for _,r in tg.iterrows():
         rows.append(dict(level="gemeinde",key=r.key,
@@ -167,6 +205,7 @@ def _save(tg,tw,mx_w,p_w,mx_l,p_l):
     pd.DataFrame([
         dict(test="wkr",max_count=mx_w,p=p_w),
         dict(test="land",max_count=mx_l,p=p_l),
+        dict(test="wkr_cond",max_count=mx_c,p=p_c),
     ]).to_csv(DATA/"clustering_perm.csv",index=False)
     print(f"\n  Saved → clustering_results.csv")
 

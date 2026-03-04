@@ -5,7 +5,7 @@ overlap to defuse 'model artifact' criticism."""
 import numpy as np
 import pandas as pd
 from pathlib import Path
-from scipy.special import betaln
+from bb_utils import estimate_rho, bb_p0
 
 DATA = Path("data")
 SEP = "=" * 60
@@ -46,16 +46,7 @@ def get_xgb_pred(df):
     return y, yp
 
 
-def bb_p0(n, p, rho):
-    """Beta-Binomial P(X=0)."""
-    phi = max(1/rho - 1, 1e-6)
-    a = np.maximum(p*phi, 1e-10)
-    b = np.maximum((1-p)*phi, 1e-10)
-    lp = betaln(a, b+n) - betaln(a, b)
-    return np.exp(np.clip(lp, -700, 0))
-
-
-def find_suspicious(g, bsw, pred_pct, rho=0.003):
+def find_suspicious(g, bsw, pred_pct, rho):
     """Flag suspicious zeros: BSW=0, BetaBinom P<0.01."""
     bp = np.clip(pred_pct/100, 1e-8, 1-1e-8)
     p0 = bb_p0(g, bp, rho)
@@ -64,15 +55,16 @@ def find_suspicious(g, bsw, pred_pct, rho=0.003):
     return susp, miss, p0
 
 
-def compare(df, lr_pred, xgb_pred):
+def compare(df, lr_pred, xgb_pred, rho):
     """Compare LR vs XGB suspicious sets."""
     print(f"\n{SEP}\nTRIANGULATION: LR vs XGB\n{SEP}")
     g = df["Gültige - Zweitstimmen"].values.astype(float)
     bsw = pd.to_numeric(
         df["BSW - Zweitstimmen"],
         errors="coerce").fillna(0).values
-    s_lr, m_lr, _ = find_suspicious(g, bsw, lr_pred)
-    s_xgb, m_xgb, _ = find_suspicious(g, bsw, xgb_pred)
+    s_lr, m_lr, _ = find_suspicious(g, bsw, lr_pred, rho)
+    s_xgb, m_xgb, _ = find_suspicious(
+        g, bsw, xgb_pred, rho)
     n_lr = s_lr.sum(); n_xgb = s_xgb.sum()
     both = (s_lr & s_xgb).sum()
     either = (s_lr | s_xgb).sum()
@@ -118,9 +110,12 @@ def main():
     df = load_data()
     lr = get_lr_pred()
     lr_bsw = lr["BSW_pred"].values
+    g = df["Gültige - Zweitstimmen"].values.astype(float)
+    rho_bb = estimate_rho(lr, g)
+    print(f"  BB rho={rho_bb:.6f}")
     _, xgb_bsw = get_xgb_pred(df)
     s_lr, s_xgb, m_lr, m_xgb = compare(
-        df, lr_bsw, xgb_bsw)
+        df, lr_bsw, xgb_bsw, rho_bb)
     rho = rank_corr(m_lr, m_xgb)
     ov = top_n_overlap(m_lr, m_xgb)
     # Total missing comparison

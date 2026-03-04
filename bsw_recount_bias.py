@@ -8,6 +8,7 @@ from pathlib import Path
 from scipy import stats
 
 from wahlbezirk_lr import load_2025_wbz, LAND_CODE, validate_totals
+from bb_utils import estimate_rho, bb_p0
 
 DATA = Path("data")
 SEP = "=" * 60
@@ -76,7 +77,8 @@ def characterize_recounted(df, pred):
     bd_v = _votes(df, BD).values
     bsw_pred = pred["BSW_pred"].values / 100
     lam = np.maximum(bsw_pred * g, 1e-6)
-    p_zero = np.exp(-lam)
+    rho = estimate_rho(pred, g)
+    p_zero = bb_p0(g, bsw_pred, rho)
     n = len(df)
     susp = (bsw_v == 0) & (p_zero < 0.01)
     zero_bd = (bsw_v == 0) & (bd_v > 0)
@@ -125,7 +127,8 @@ def population_compare(df, pred):
     bd_v = _votes(df, BD).values
     bp = pred["BSW_pred"].values / 100
     lam = np.maximum(bp * g, 1e-6)
-    p0 = np.exp(-lam)
+    rho = estimate_rho(pred, g)
+    p0 = bb_p0(g, bp, rho)
     ba = pd.to_numeric(df["Bezirksart"],
                        errors="coerce").fillna(0)
     susp = (bsw_v == 0) & (p0 < 0.01)
@@ -158,6 +161,25 @@ def population_compare(df, pred):
                   f" susp={m_s}")
 
 
+def _sel_bias(df, pred):
+    """Compare λ: suspicious vs all."""
+    print(f"\n{SEP}\nSELECTION BIAS\n{SEP}")
+    g=_valid(df).astype(float)
+    bsw_v=_votes(df,"BSW").values
+    bp=pred["BSW_pred"].values/100
+    lam=bp*g; rho=estimate_rho(pred,g)
+    p0=bb_p0(g,bp,rho)
+    susp=(bsw_v==0)&(p0<0.01)
+    print(f"  λ: all={lam.mean():.1f}"
+          f" susp={lam[susp].mean():.1f}")
+    ks,p=stats.ks_2samp(lam[susp],lam[~susp])
+    print(f"  KS(λ): D={ks:.3f} p={p:.3e}")
+    for q in [50,75,90,95]:
+        v=np.percentile(lam,q)
+        a=(lam[susp]>v).sum()
+        print(f"  >{q}th(>{v:.0f}): {a}/{susp.sum()}")
+
+
 def main():
     df, pred = load_all()
     n = len(df)
@@ -168,6 +190,7 @@ def main():
     sens = sensitivity_curve(
         rates, n, extra_fracs=[f_susp, f_zbd])
     population_compare(df, pred)
+    _sel_bias(df, pred)
     print(f"\n{SEP}\nINTERPRETATION\n{SEP}")
     n_s = pop["n_susp"]
     row = sens.loc[(sens["f"]-f_susp).abs().idxmin()]

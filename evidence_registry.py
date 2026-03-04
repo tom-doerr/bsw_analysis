@@ -9,6 +9,7 @@ from pathlib import Path
 from scipy.stats import poisson
 
 from wahlbezirk_lr import load_2025_wbz, LAND_CODE, validate_totals
+from bb_utils import estimate_rho, bb_p0
 
 DATA = Path("data")
 SEP = "=" * 60
@@ -70,7 +71,8 @@ def compute_scores(df, pred):
     bsw_pred_pct = pred["BSW_pred"].values
     bsw_resid = pred["BSW_resid"].values
     bp = np.clip(bsw_pred_pct / 100, 1e-8, 1-1e-8)
-    p_zero = np.power(1 - bp, g)  # Binomial exact
+    rho = estimate_rho(pred, g)
+    p_zero = bb_p0(g, bp, rho)  # Beta-Binomial
     mu = bsw_resid.mean()
     sd = max(bsw_resid.std(), 1e-6)
     bsw_resid_z = (bsw_resid - mu) / sd

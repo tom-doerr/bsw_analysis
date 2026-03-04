@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 """Latent-class model to infer π (problem precinct
-fraction) from registry flags instead of choosing
-it by hand. Anchors the generative model."""
+fraction). Uses continuous likelihood (not binary
+cutoffs) for identifiability. BB-calibrated."""
 
 import numpy as np
 import pandas as pd
 from pathlib import Path
-from scipy.special import betaln
+from bb_utils import estimate_rho, bb_p0
 
 DATA = Path("data")
 SEP = "=" * 60
@@ -32,65 +32,77 @@ def load_all():
     return df, pred
 
 
-def compute_flags(df, pred):
-    """Compute per-precinct flag indicators."""
+def compute_continuous(df, pred):
+    """Compute continuous indicators for EM."""
     g = df["Gültige - Zweitstimmen"].values.astype(float)
     bsw = pd.to_numeric(
         df["BSW - Zweitstimmen"],
         errors="coerce").fillna(0).values
     bp = np.clip(pred["BSW_pred"].values/100,
                  1e-8, 1-1e-8)
-    p0 = np.power(1-bp, g)
-    resid_z = (pred["BSW_resid"].values
-               - pred["BSW_resid"].mean())
-    resid_z /= max(pred["BSW_resid"].std(), 1e-6)
-    # Flags as noisy indicators of latent problem
-    f_zero = (bsw == 0) & (p0 < 0.01)
-    f_resid = resid_z < -2
-    # At least one flag
-    any_flag = f_zero | f_resid
-    return f_zero, f_resid, any_flag, g, bsw, bp
+    rho = estimate_rho(pred, g)
+    p0 = bb_p0(g, bp, rho)
+    # Continuous x1: -log10(p0), higher=more suspicious
+    x1 = -np.log10(np.clip(p0, 1e-300, 1))
+    # Continuous x2: -resid_z, higher=more negative
+    rz = (pred["BSW_resid"].values
+          - pred["BSW_resid"].mean())
+    rz /= max(pred["BSW_resid"].std(), 1e-6)
+    x2 = -rz
+    return x1, x2, g, bsw, bp, rho
 
 
-def _em_step(f1,f2,pi,s1,s2,fp1,fp2,n):
-    l1=f1*np.log(s1+1e-30)+(1-f1)*np.log(1-s1+1e-30)
-    l0=f1*np.log(fp1+1e-30)+(1-f1)*np.log(1-fp1+1e-30)
-    l1+=f2*np.log(s2+1e-30)+(1-f2)*np.log(1-s2+1e-30)
-    l0+=f2*np.log(fp2+1e-30)+(1-f2)*np.log(1-fp2+1e-30)
-    ln=np.log(pi+1e-30)+l1
-    ld=np.logaddexp(ln,np.log(1-pi+1e-30)+l0)
-    g=np.exp(ln-ld); sg=g.sum()
-    pi=sg/n; s1=(g*f1).sum()/max(sg,1e-10)
-    s2=(g*f2).sum()/max(sg,1e-10); ng=n-sg
-    fp1=((1-g)*f1).sum()/max(ng,1e-10)
-    fp2=((1-g)*f2).sum()/max(ng,1e-10)
-    return pi,s1,s2,fp1,fp2,g
+def _log_norm(x, mu, var):
+    """Log-pdf of N(mu, var)."""
+    return -0.5*(np.log(2*np.pi*var)+(x-mu)**2/var)
 
 
-def em_latent_class(f_zero, f_resid, n):
-    """EM for latent class: z_i∈{0,1}."""
-    pi=0.05;s1,s2=0.5,0.3;fp1,fp2=0.005,0.02
-    f1=f_zero.astype(float);f2=f_resid.astype(float)
-    for it in range(200):
+def _em_mstep(gam, x1, x2, n):
+    """M-step: update means and variances."""
+    sg=gam.sum(); ng=n-sg
+    m1_1=(gam*x1).sum()/max(sg,1e-10)
+    m2_1=(gam*x2).sum()/max(sg,1e-10)
+    m1_0=((1-gam)*x1).sum()/max(ng,1e-10)
+    m2_0=((1-gam)*x2).sum()/max(ng,1e-10)
+    _s,_n=max(sg,1),max(ng,1)
+    v1_1=max((gam*(x1-m1_1)**2).sum()/_s,1e-6)
+    v2_1=max((gam*(x2-m2_1)**2).sum()/_s,1e-6)
+    v1_0=max(((1-gam)*(x1-m1_0)**2).sum()/_n,1e-6)
+    v2_0=max(((1-gam)*(x2-m2_0)**2).sum()/_n,1e-6)
+    return (m1_1,m1_0,m2_1,m2_0,
+            v1_1,v1_0,v2_1,v2_0)
+
+
+def em_continuous(x1, x2, n, max_it=500):
+    """EM: continuous Gaussian mixture."""
+    pi=0.05
+    m=np.percentile(x1,95),np.mean(x1)
+    m2=np.percentile(x2,95),np.mean(x2)
+    v=np.var(x1),np.var(x1)
+    v2=np.var(x2),np.var(x2)
+    for it in range(max_it):
         pi_o=pi
-        pi,s1,s2,fp1,fp2,gam=_em_step(
-            f1,f2,pi,s1,s2,fp1,fp2,n)
+        ll1=_log_norm(x1,m[0],v[0])+_log_norm(x2,m2[0],v2[0])
+        ll0=_log_norm(x1,m[1],v[1])+_log_norm(x2,m2[1],v2[1])
+        ln1=np.log(pi+1e-30)+ll1
+        ld=np.logaddexp(ln1,np.log(1-pi+1e-30)+ll0)
+        gam=np.exp(ln1-ld); pi=gam.sum()/n
+        r=_em_mstep(gam,x1,x2,n)
+        m=(r[0],r[1]); m2=(r[2],r[3])
+        v=(r[4],r[5]); v2=(r[6],r[7])
         if abs(pi-pi_o)<1e-8: break
-    return dict(pi=pi,s_zero=s1,s_resid=s2,
-        fp_zero=fp1,fp_resid=fp2,
-        gamma=gam,iters=it+1)
+    return dict(pi=pi,gamma=gam,iters=it+1,
+        mu1=m,mu2=m2,var1=v,var2=v2)
 
 
-def bootstrap_pi(f_zero, f_resid, n, n_boot=1000):
+def bootstrap_pi(x1, x2, n, n_boot=1000):
     """Bootstrap CI for π."""
     rng = np.random.RandomState(42)
     pis = []
     for _ in range(n_boot):
         idx = rng.choice(n, n, replace=True)
-        r = em_latent_class(
-            f_zero[idx], f_resid[idx], n)
+        r = em_continuous(x1[idx], x2[idx], n)
         pis.append(r["pi"])
-    pis = np.array(pis)
     return np.percentile(pis, [2.5, 50, 97.5])
 
 
@@ -115,23 +127,22 @@ def mc_with_inferred_pi(pi, n, n_sims=N_SIMS):
 
 def main():
     df, pred = load_all()
-    f0, fr, af, g, bsw, bp = compute_flags(df, pred)
+    x1, x2, g, bsw, bp, rho = compute_continuous(df, pred)
     n = len(df)
-    print(f"\n{SEP}\nLATENT CLASS MODEL\n{SEP}")
-    print(f"  n={n}, flags: zero={f0.sum()},"
-          f" resid={fr.sum()}, any={af.sum()}")
-    r = em_latent_class(f0, fr, n)
+    print(f"\n{SEP}\nLATENT CLASS MODEL (continuous)\n{SEP}")
+    print(f"  n={n}, BB rho={rho:.6f}")
+    r = em_continuous(x1, x2, n)
     print(f"\n  EM results ({r['iters']} iters):")
     print(f"    π = {r['pi']:.4f}"
           f" ({r['pi']*100:.2f}% problem)")
-    print(f"    sens(zero) = {r['s_zero']:.3f}")
-    print(f"    sens(resid) = {r['s_resid']:.3f}")
-    print(f"    fp(zero) = {r['fp_zero']:.4f}")
-    print(f"    fp(resid) = {r['fp_resid']:.4f}")
-    print(f"    E[problem] = {r['pi']*n:.0f} precincts")
+    print(f"    μ(-log10 p0): prob={r['mu1'][0]:.2f}"
+          f" norm={r['mu1'][1]:.2f}")
+    print(f"    μ(-resid_z): prob={r['mu2'][0]:.2f}"
+          f" norm={r['mu2'][1]:.2f}")
+    print(f"    E[problem] = {r['pi']*n:.0f}")
     # Bootstrap CI
     print(f"\n  Bootstrapping π (1000 reps)...")
-    ci = bootstrap_pi(f0, fr, n, 1000)
+    ci = bootstrap_pi(x1, x2, n, 1000)
     print(f"    π 95% CI: [{ci[0]:.4f},"
           f" {ci[1]:.4f}, {ci[2]:.4f}]")
     # MC with inferred π
@@ -151,8 +162,8 @@ def main():
     rows=[dict(param="pi_mle",value=r["pi"]),
           dict(param="pi_ci_lo",value=ci[0]),
           dict(param="pi_ci_hi",value=ci[2]),
-          dict(param="sens_zero",value=r["s_zero"]),
-          dict(param="sens_resid",value=r["s_resid"]),
+          dict(param="mu_logp0_prob",value=r["mu1"][0]),
+          dict(param="mu_logp0_norm",value=r["mu1"][1]),
           dict(param="p_cross",value=pc),
           dict(param="median_missing",value=p50)]
     pd.DataFrame(rows).to_csv(

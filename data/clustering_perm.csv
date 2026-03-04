@@ -1,3 +1,4 @@
 test,max_count,p
-wkr,5,0.017
-land,51,0.0
+wkr,4,0.0456
+land,35,0.0
+wkr_cond,4,0.3832
