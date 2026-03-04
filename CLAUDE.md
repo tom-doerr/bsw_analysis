@@ -24,6 +24,7 @@ Repo: `~/git/bsw_analysis` (github.com/tom-doerr/bsw_analysis)
 - `bsw_adjacency_did.py` — Ballot adjacency DiD
 - `bsw_generative.py` — Latent-variable generative model
 - `bsw_affidavits.py` — Sworn statement cross-reference
+- `calibrate_zero_model.py` — Zero-vote model calibration
 
 ## Data (`data/`)
 - `btw{25,21,17,13}_wbz.zip` — Precinct-level election results
@@ -73,28 +74,32 @@ Repo: `~/git/bsw_analysis` (github.com/tom-doerr/bsw_analysis)
 - Power: forensic battery cannot detect 9,529×1 miscount (0%)
 
 ## Evidence Registry
-- 5,400 flagged precincts (of 95k) by 4 criteria
-- 239 BSW=0 in flagged, 104 suspicious (P<1%)
-- 3 known cases matched with all 4 flags
+- 3,735 flagged precincts by 4 criteria (Binomial P(0), BD rank pctile)
+- missing_votes col, sorted descending; calibration per Land
+- BY +64, NI +36, HE +29 excess zeros
 - Output: data/evidence_registry.csv + .json
 
 ## Recount Bias Analysis
 - Rate θ=0.304 [0.177, 0.481] from Gamma posterior
-- 104 suspicious precincts only → ~289 votes
+- 104 suspicious precincts only → ~31 votes (P=0%)
 - Need f≥20% representativeness for crossing chance
-- f=30%: P=35.6%, f=50%: P=93.9%
+- f=30%: P=35.5%, f=50%: P=94.1%
 
 ## Adjacency DiD
 - Anomalies LOWER where BSW has Erst (ratio 0.43)
-- BSW=0 5.76x more in Urne vs Brief (size effect)
-- FDP↔FW has more zero-with-neighbor than BSW↔BD
+- Logistic: has_erst OR=1.12 p=0.50 (not significant after controls)
+- FDP placebo: has_erst OR=1.54 p=0.04 (opposite direction)
 - 471/517 BSW=0 in smallest quintile (Poisson noise)
-- Residuals more negative in Erst WKRs (t=-21.4)
 
 ## Generative Model
 - Swap+zeroout channels, no double-counting
 - Conservative: med=1,832, P=0%
-- Bias-adjusted (10% problem): med=7,175, P=34%
+- Bias-adjusted Beta(1,9): med=7,175, P=34%
+- π sweep: P(≥9529) crosses 50% at π≈20%
+
+## Zero Calibration
+- Excess zeros in λ=1-20 range
+- BY +64, NI +36, HE +29 excess zeros per Land
 
 ## Affidavit Analysis
 - 3 matched: 99.9-100th pct BD within Land

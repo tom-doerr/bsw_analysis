@@ -89,7 +89,7 @@ def characterize_recounted(df, pred):
             "n_zero_bd": zero_bd.sum()}
 
 
-def sensitivity_curve(rates, n_total):
+def sensitivity_curve(rates, n_total, extra_fracs=None):
     """For each representativeness f, P(≥deficit)."""
     print(f"\n{SEP}")
     print("SENSITIVITY: Representativeness sweep")
@@ -97,6 +97,8 @@ def sensitivity_curve(rates, n_total):
     rng = np.random.RandomState(42)
     fracs = [0.01,0.02,0.05,0.1,0.15,
              0.2,0.3,0.5,0.75,1.0]
+    if extra_fracs:
+        fracs = sorted(set(fracs + extra_fracs))
     rows = []
     for f in fracs:
         n_a = int(f * n_total)
@@ -107,7 +109,8 @@ def sensitivity_curve(rates, n_total):
         rows.append(dict(f=f, n_apply=n_a,
             median=med, p_cross=pc,
             ci5=lo, ci95=hi))
-        print(f"  f={f:.0%} med={med:,.0f}"
+        fmt = f"{f:.2%}" if f < 0.01 else f"{f:.0%}"
+        print(f"  f={fmt} med={med:,.0f}"
               f" P={pc:.1%} [{lo:,.0f},{hi:,.0f}]")
     return pd.DataFrame(rows)
 
@@ -160,14 +163,15 @@ def main():
     n = len(df)
     rates = bootstrap_rate()
     pop = characterize_recounted(df, pred)
-    sens = sensitivity_curve(rates, n)
+    f_susp = pop["n_susp"] / n
+    f_zbd = pop["n_zero_bd"] / n
+    sens = sensitivity_curve(
+        rates, n, extra_fracs=[f_susp, f_zbd])
     population_compare(df, pred)
-    # Interpretation
     print(f"\n{SEP}\nINTERPRETATION\n{SEP}")
     n_s = pop["n_susp"]
-    f_s = n_s / n
-    row = sens[sens["f"] >= f_s].iloc[0]
-    print(f"  Suspicious: {n_s:,} ({f_s:.3%})")
+    row = sens.loc[(sens["f"]-f_susp).abs().idxmin()]
+    print(f"  Suspicious: {n_s:,} ({f_susp:.4%})")
     print(f"  If rate applies to susp only:"
           f" med={row['median']:,.0f}"
           f" P={row['p_cross']:.1%}")

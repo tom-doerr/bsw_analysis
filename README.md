@@ -38,6 +38,7 @@ Datenquelle: © Die Bundeswahlleiterin, Wiesbaden 2025 ([bundeswahlleiterin.de](
 - `bsw_adjacency_did.py` — Ballot adjacency natural experiment
 - `bsw_generative.py` — Latent-variable generative model (no double-counting)
 - `bsw_affidavits.py` — Sworn statement cross-reference
+- `calibrate_zero_model.py` — Zero-vote model calibration
 
 ## Features
 
@@ -228,29 +229,30 @@ Forensic battery **cannot detect** spread-thin miscounts
 
 ## Evidence Registry
 
-5,400 flagged precincts from 95k, by 4 anomaly criteria.
-239 BSW=0 in flagged set, 104 suspicious (P<1%).
-Top: HE WKR 168 (BD z=+26), BY WKR 221 (BD z=+26),
-SN WKR 157 Reinhardtsdorf (BD=12, BSW=0, P=1.6×10⁻⁵).
-All 3 known filing cases matched with all 4 flags.
+3,735 flagged precincts from 95k. Uses Binomial P(BSW=0)
+and BD rank percentiles within Land (not z-scores).
+Ranked by `missing_votes` (expected BSW if no error).
+Calibration: BY +64, NI +36, HE +29 excess zeros.
+All 3 known filing cases matched.
 
 ## Recount Bias: Sensitivity Curve
 
 Rate θ=0.304 [0.18, 0.48]. If recounts represent only the
-104 suspicious precincts: ~289 votes (P=0%). Need f≥20%
-representativeness for any chance. f=30%: P=35.6%.
+104 suspicious precincts: ~31 votes (P=0%). Need f≥20%
+representativeness for any chance. f=30%: P=35.5%.
 
 ## Ballot Adjacency Natural Experiment
 
 Anomalies **lower** where BSW has Erst (ratio 0.43).
+Logistic regression with controls: has_erst OR=1.12,
+**p=0.50** (not significant). FDP placebo: OR=1.54, p=0.04.
 BSW=0 concentrates in small precincts (471/517 in Q0).
-FDP↔FW has more zero-neighbor cases than BSW↔BD.
-Pattern consistent with Poisson noise, not confusion.
 
 ## Generative Model (no double-counting)
 
 Swap + zero-out channels. Conservative: med=1,832, P=0%.
-Bias-adjusted (10% problem): med=7,175, **P=34%**.
+Bias-adjusted Beta(1,9): med=7,175, **P=34%**.
+π sweep: P(≥9,529) crosses 50% at π≈20% of precincts.
 
 ## Usage
 
@@ -269,4 +271,5 @@ python3 bsw_recount_bias.py    # recount bias analysis
 python3 bsw_adjacency_did.py   # adjacency DiD
 python3 bsw_generative.py      # generative model
 python3 bsw_affidavits.py      # affidavit cross-reference
+python3 calibrate_zero_model.py # zero-vote calibration
 ```

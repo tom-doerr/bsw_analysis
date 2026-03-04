@@ -8,6 +8,7 @@ from pathlib import Path
 from scipy import stats
 from scipy.stats import pearsonr
 
+import statsmodels.api as sm
 from wahlbezirk_lr import (load_2025_wbz, LAND_CODE,
                             validate_totals)
 
@@ -173,6 +174,63 @@ def bsw_resid_by_erst(df, pred):
     print(f"  t={t:.3f} p={p:.4f}")
 
 
+def _build_logit_X(df, pred):
+    """Build design matrix for logistic DiD."""
+    g=_g(df); bp=pred["BSW_pred"].values/100
+    ba=pd.to_numeric(df["Bezirksart"],
+                     errors="coerce")
+    wkr=pd.to_numeric(df["Wahlkreis"],
+                      errors="coerce")
+    land=pd.to_numeric(df["Land"],
+                       errors="coerce")
+    we=df.groupby(wkr).apply(
+        lambda x:_ve(x,"BSW").sum()>0)
+    has=wkr.map(we).fillna(False).astype(int)
+    X=pd.DataFrame({
+        "has_erst": has.values,
+        "log_valid": np.log1p(g),
+        "bsw_pred": bp,
+        "is_brief": (ba==5).astype(int).values})
+    ld=pd.get_dummies(land,prefix="L",
+        drop_first=True,dtype=float)
+    X=pd.concat([X,ld],axis=1).astype(float)
+    return sm.add_constant(X)
+
+
+def _print_logit(mdl, label):
+    print(f"\n  {label}:")
+    for v in ["has_erst","log_valid",
+              "bsw_pred","is_brief"]:
+        if v in mdl.params.index:
+            c=mdl.params[v]; p=mdl.pvalues[v]
+            print(f"    {v:<12} coef={c:+.3f}"
+                  f" OR={np.exp(c):.3f}"
+                  f" p={p:.4f}")
+    print(f"  pseudo-R²={mdl.prsquared:.4f}")
+
+
+def logistic_did(df, pred):
+    """Logistic regression: BSW=0 with controls."""
+    print(f"\n{SEP}")
+    print("LOGISTIC DiD: BSW=0 with controls")
+    print(SEP)
+    X = _build_logit_X(df, pred)
+    bsw=_v(df,"BSW").values
+    y=(bsw==0).astype(int)
+    try:
+        m=sm.Logit(y,X).fit(disp=0)
+        _print_logit(m, "BSW=0")
+    except Exception as e:
+        print(f"  Logit failed: {e}")
+    fdp=_v(df,"FDP").values
+    y2=(fdp==0).astype(int)
+    try:
+        m2=sm.Logit(y2,X).fit(disp=0)
+        _print_logit(m2, "FDP=0 (placebo)")
+    except Exception as e:
+        print(f"  FDP placebo: {e}")
+
+
 def main():
     df, pred = load_all()
     erst_presence_did(df, pred)
@@ -180,6 +238,7 @@ def main():
     placebo_pairs(df)
     size_stratified(df, pred)
     bsw_resid_by_erst(df, pred)
+    logistic_did(df, pred)
     # Save summary
     bsw=_v(df,"BSW").values; z=bsw==0
     ba=pd.to_numeric(df["Bezirksart"],

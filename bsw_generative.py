@@ -152,6 +152,25 @@ def mc_bias_adjusted(params):
     return totals
 
 
+def mc_fixed_pi(params, pi_prob):
+    """Bias-adjusted with fixed π_problem."""
+    rng = np.random.RandomState(42)
+    n=params["n"]; pi_z=params["pi_zero"]
+    mu_z=params["mu_zero"]
+    s_a=params["swap_shape"]; s_r=params["swap_rate"]
+    totals = np.empty(N_SIMS)
+    for i in range(N_SIMS):
+        n_hi = rng.binomial(n, pi_prob)
+        th_hi = rng.gamma(s_a, 1/s_r)
+        th_lo = rng.gamma(0.5, 1/10)
+        swap = (rng.poisson(th_hi*n_hi)
+                + rng.poisson(th_lo*(n-n_hi)))
+        n_z = rng.binomial(n, pi_z)
+        zero_v = rng.poisson(mu_z, n_z).sum()
+        totals[i] = swap + zero_v
+    return totals
+
+
 def _stats(totals, label):
     p5,p50,p95 = np.percentile(totals,[5,50,95])
     pc = (totals >= DEFICIT).mean()
@@ -175,6 +194,14 @@ def main():
     rows.append(_stats(t2, "full_uniform"))
     t3 = mc_bias_adjusted(params)
     rows.append(_stats(t3, "bias_adjusted"))
+    # π sweep
+    print(f"\n{SEP}")
+    print("STAGE 3: π_problem sweep")
+    print(SEP)
+    pis = [.01,.02,.05,.10,.15,.20,.30,.50]
+    for pi in pis:
+        t = mc_fixed_pi(params, pi)
+        rows.append(_stats(t, f"pi={pi:.0%}"))
     out = pd.DataFrame(rows)
     out.to_csv(DATA/"generative_model_posterior.csv",
                index=False)

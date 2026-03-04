@@ -69,22 +69,21 @@ def compute_scores(df, pred):
     bd_v = _votes(df, BD).values.astype(float)
     bsw_pred_pct = pred["BSW_pred"].values
     bsw_resid = pred["BSW_resid"].values
-    lam = np.maximum(bsw_pred_pct / 100 * g, 1e-6)
-    p_zero = np.exp(-lam)
+    bp = np.clip(bsw_pred_pct / 100, 1e-8, 1-1e-8)
+    p_zero = np.power(1 - bp, g)  # Binomial exact
     mu = bsw_resid.mean()
     sd = max(bsw_resid.std(), 1e-6)
     bsw_resid_z = (bsw_resid - mu) / sd
-    # BD z-score within Land
+    # BD rank percentile within Land
     land = pd.to_numeric(df["Land"], errors="coerce")
     bd_share = np.where(g > 0, bd_v / g * 100, 0)
-    bd_z = np.zeros(len(df))
+    bd_pctile = np.zeros(len(df))
     for lv in land.dropna().unique():
         m = (land == lv).values
         if m.sum() < 10:
             continue
-        lmu = bd_share[m].mean()
-        lsd = max(bd_share[m].std(), 1e-6)
-        bd_z[m] = (bd_share[m] - lmu) / lsd
+        ranks = pd.Series(bd_share[m]).rank(pct=True)
+        bd_pctile[m] = ranks.values
 
     wkr = pd.to_numeric(
         df.get("Wahlkreis", df.iloc[:, 0]),
@@ -106,7 +105,7 @@ def compute_scores(df, pred):
         "bsw_resid": np.round(bsw_resid, 3),
         "bsw_resid_z": np.round(bsw_resid_z, 3),
         "p_bsw_zero": np.round(p_zero, 6),
-        "bd_zscore_land": np.round(bd_z, 3),
+        "bd_pctile_land": np.round(bd_pctile, 4),
     })
     return scores
 
@@ -116,11 +115,11 @@ def flag_suspicious(scores):
     bv = scores["bsw_votes"].values
     pz = scores["p_bsw_zero"].values
     rz = scores["bsw_resid_z"].values
-    bz = scores["bd_zscore_land"].values
+    bp = scores["bd_pctile_land"].values
     bd = scores["bd_votes"].values
     f1 = (bv == 0) & (pz < 0.01)
     f2 = rz < -2
-    f3 = bz > 2
+    f3 = bp > 0.98  # top 2% BD within Land
     f4 = (bv == 0) & (bd > 5)
     mask = f1 | f2 | f3 | f4
     out = scores[mask].copy()
@@ -183,29 +182,48 @@ def main():
 
     # Per-Land breakdown
     print(f"\n  {'Land':<4} {'n':>5} {'BSW=0':>6}"
-          f" {'mean_BD_z':>9}")
+          f" {'mean_BD_pct':>11}")
     for land in sorted(reg["land"].unique()):
         m = reg["land"] == land
         n = m.sum()
         nz = ((reg["bsw_votes"] == 0) & m).sum()
-        bz = reg.loc[m, "bd_zscore_land"].mean()
+        bp = reg.loc[m, "bd_pctile_land"].mean()
         print(f"  {land:<4} {n:>5} {nz:>6}"
-              f" {bz:>+9.2f}")
+              f" {bp:>11.3f}")
 
-    # Top 20: BSW=0 with highest BD z-score
+    # Add missing_votes for BSW=0 precincts
+    reg["missing_votes"] = np.where(
+        reg["bsw_votes"] == 0,
+        reg["bsw_pred_pct"]/100 * reg["valid_total"],
+        0).round(1)
+
+    # Top 20 by missing votes
     zeros = reg[reg["bsw_votes"] == 0]
     top = zeros.sort_values(
-        "bd_zscore_land", ascending=False).head(20)
-    print(f"\n  Top 20 most suspicious:")
-    print(f"  {'Land':<4} {'WKR':>4} {'BSW':>4}"
-          f" {'BD':>4} {'Valid':>5} {'P(0)':>8}"
-          f" {'BD_z':>6}")
+        "missing_votes", ascending=False).head(20)
+    print(f"\n  Top 20 by missing votes:")
+    print(f"  {'Land':<4} {'WKR':>4} {'BD':>4}"
+          f" {'Valid':>5} {'Miss':>5} {'P(0)':>8}")
     for _, r in top.iterrows():
         print(f"  {r.land:<4} {r.wahlkreis:>4}"
-              f" {r.bsw_votes:>4} {r.bd_votes:>4}"
-              f" {r.valid_total:>5}"
-              f" {r.p_bsw_zero:>8.2e}"
-              f" {r.bd_zscore_land:>+6.2f}")
+              f" {r.bd_votes:>4} {r.valid_total:>5}"
+              f" {r.missing_votes:>5.0f}"
+              f" {r.p_bsw_zero:>8.2e}")
+
+    # Calibration: obs vs exp zeros per Land
+    all_sc = compute_scores(df, pred)
+    all_land = all_sc["land"].values
+    all_bsw = all_sc["bsw_votes"].values
+    all_p0 = all_sc["p_bsw_zero"].values
+    print(f"\n  Calibration (obs vs exp zeros):")
+    print(f"  {'Land':<4} {'obs':>5} {'exp':>7}"
+          f" {'excess':>7}")
+    for land in sorted(set(all_land)):
+        m = all_land == land
+        obs = (all_bsw[m] == 0).sum()
+        exp = all_p0[m].sum()
+        print(f"  {land:<4} {obs:>5} {exp:>7.1f}"
+              f" {obs-exp:>+7.1f}")
 
     # Known case matches
     matched = reg[reg["source"] != ""]
@@ -214,8 +232,10 @@ def main():
         print(f"    {r.land} WKR={r.wahlkreis}"
               f" {r.gemeinde}: {r.claim}")
 
-    # Save CSV
+    # Save CSV (sorted by missing votes)
     out_csv = DATA / "evidence_registry.csv"
+    reg = reg.sort_values(
+        "missing_votes", ascending=False)
     save = reg.copy()
     save["flags"] = save["flags"].apply(
         lambda f: "|".join(f))
