@@ -25,6 +25,11 @@ Repo: `~/git/bsw_analysis` (github.com/tom-doerr/bsw_analysis)
 - `bsw_generative.py` — Latent-variable generative model
 - `bsw_affidavits.py` — Sworn statement cross-reference
 - `calibrate_zero_model.py` — Zero-vote model calibration
+- `calibrate_zero_betabinom.py` — Beta-Binomial zero calibration (model uncertainty)
+- `triangulate_lr_xgb.py` — LR vs XGB suspicious precinct overlap
+- `latent_class_pi.py` — EM latent-class π inference from flags
+- `clustering_test.py` — Geographic clustering permutation tests
+- `brief_colocation.py` — Briefwahl gap co-location with registry
 
 ## Data (`data/`)
 - `btw{25,21,17,13}_wbz.zip` — Precinct-level election results
@@ -100,6 +105,32 @@ Repo: `~/git/bsw_analysis` (github.com/tom-doerr/bsw_analysis)
 ## Zero Calibration
 - Excess zeros in λ=1-20 range
 - BY +64, NI +36, HE +29 excess zeros per Land
+
+## Beta-Binomial Zero Calibration (v2)
+- ρ=0.002712 (2x overdispersion vs Binomial)
+- 24% of excess zeros survive model uncertainty
+- Bins 10-20: +26.7, 20-50: +14.0 still excess
+- FDP/Linke show negative excess (BSW-specific)
+
+## LR vs XGB Triangulation
+- 71% Jaccard overlap of suspicious precincts
+- Spearman ρ=0.898, Top-20: 80%, Top-50: 92%
+- Total missing: LR 2,054 vs XGB 1,986
+
+## Latent-Class π Inference
+- EM: π=2.04% [1.89%, 2.18%] problem precincts
+- Sensitivity: zero=5.6%, resid=58.3%
+- E[problem]=1,934; P(cross)=30.3%
+
+## Geographic Clustering
+- BY: 51/108 suspicious (0.28%, highest)
+- WKR clustering p=0.017, Land p<0.001
+- Top: Rieneck(38), Flensburg(35), Wedel(34)
+
+## Briefwahl Co-Location
+- Anomaly actually NEGATIVE (-0.563pp, p<1e-22)
+- No correlation with registry (ρ=-0.030)
+- Brief gap is demographic, not miscount
 
 ## Affidavit Analysis
 - 3 matched: 99.9-100th pct BD within Land
