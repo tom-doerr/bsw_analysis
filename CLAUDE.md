@@ -132,7 +132,7 @@ Repo: `~/git/bsw_analysis` (github.com/tom-doerr/bsw_analysis)
 ## Pipeline Consistency (v4)
 - All scripts use bb_utils.estimate_rho + bb_p0
 - Shared module: bb_utils.py
-- Makefile for full reproducibility (`make all`)
+- Makefile: `make all` (full), `make clean` (reset)
 - Updated: registry, latent_class, triangulation,
   clustering, brief_colocation, recount_bias
 
@@ -143,8 +143,8 @@ Repo: `~/git/bsw_analysis` (github.com/tom-doerr/bsw_analysis)
 - Output: data/top_anomalies_bb.csv
 
 ## Null Simulation Calibration
-- 200 BB(p,ρ) null worlds, no fraud
-- **Flag rate: SIGNIFICANT (p=0.000)**
+- 200 BB(p,ρ) null worlds, +1 p-value correction
+- **Flag rate: SIGNIFICANT (p=0.005)**
 - Null flags: med=31 [23, 43], observed=74, excess=43
 - **Latent π: NOT significant (p=0.29)**
 - Null π: med=0.2431, observed=0.2439
@@ -152,8 +152,8 @@ Repo: `~/git/bsw_analysis` (github.com/tom-doerr/bsw_analysis)
 
 ## Neighborhood Credibility
 - 74 anomalies, 72 with Gemeinde neighbors
-- 97.6% of neighbors have BSW>0
-- Top: Rieneck λ=37.8 (37 nbr, all BSW>0, EW24=4.2%)
+- Weighted frac BSW>0: 99.7% (matched control: 99.8%)
+- Metric is baseline-high everywhere (not discriminating)
 - EW24 confirms BSW presence in anomaly Gemeinden
 - Output: data/neighborhood_credibility.csv
 

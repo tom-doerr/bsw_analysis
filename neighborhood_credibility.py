@@ -115,6 +115,29 @@ def analyze(df, pred, lc, ew24):
     return pd.DataFrame(rows)
 
 
+def matched_ctrl(g,bsw,bp,susp,gk,ln,n_d=200):
+    """Matched non-anomalous control: neighbor BSW>0 frac."""
+    rng=np.random.RandomState(42)
+    lam=bp*g; bins=[0,5,10,20,50,np.inf]
+    lb=np.digitize(lam,bins)
+    st=np.array([f"{l}_{b}" for l,b in zip(ln,lb)])
+    idx_s=np.where(susp)[0]
+    pool=np.where(~susp&(bsw>0))[0]
+    fracs=[]
+    for _ in range(n_d):
+        sel=[]
+        for i in idx_s:
+            c=pool[st[pool]==st[i]]
+            if len(c)>0: sel.append(rng.choice(c))
+        if not sel: continue
+        tn=tg=0
+        for j in sel:
+            nb=np.where(gk==gk[j])[0]; nb=nb[nb!=j]
+            tn+=len(nb); tg+=(bsw[nb]>0).sum()
+        fracs.append(tg/max(tn,1))
+    return np.array(fracs)
+
+
 def main():
     df,pred,lc = load_btw25()
     ew24 = load_ew24_gem()
@@ -122,17 +145,30 @@ def main():
     tbl = analyze(df, pred, lc, ew24)
     print(f"\n{SEP}\nNEIGHBORHOOD CREDIBILITY\n{SEP}")
     print(f"  Anomalies: {len(tbl)}")
-    # Summary stats
     has_nbr = tbl["n_nbr"] > 0
     print(f"  With neighbors: {has_nbr.sum()}")
-    all_gt0 = tbl.loc[has_nbr, "nbr_bsw_gt0"]
+    gt0 = tbl.loc[has_nbr, "nbr_bsw_gt0"]
     nn = tbl.loc[has_nbr, "n_nbr"]
-    frac = (all_gt0 / nn).mean()
-    print(f"  Avg frac neighbors BSW>0: {frac:.1%}")
+    frac = (gt0/nn).mean()
+    wfrac = gt0.sum()/nn.sum()
+    print(f"  Avg frac BSW>0: {frac:.1%}")
+    print(f"  Weighted frac: {wfrac:.1%}")
+    _ctrl(df, pred, lc)
     _show_top(tbl)
     tbl.to_csv(DATA/"neighborhood_credibility.csv",
                index=False)
     print(f"\n  Saved → neighborhood_credibility.csv")
+
+
+def _ctrl(df, pred, lc):
+    """Run matched control comparison."""
+    vals = _prep(df, pred, lc)
+    g,bsw,bp,rho,p0,susp,gk,ln,gem,wkr = vals
+    cf = matched_ctrl(g,bsw,bp,susp,gk,ln)
+    cm = np.median(cf)
+    lo,hi = np.percentile(cf,[5,95])
+    print(f"  Control frac: med={cm:.1%}"
+          f" [{lo:.1%}, {hi:.1%}]")
 
 
 def _show_top(tbl, k=20):

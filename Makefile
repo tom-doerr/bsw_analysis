@@ -1,4 +1,4 @@
-.PHONY: all clean predictions forensic evidence
+.PHONY: all clean predictions forensic evidence modeling spatial misc
 
 PYTHON ?= python
 
@@ -39,3 +39,10 @@ misc: predictions
 all: forensic evidence modeling spatial misc
 	$(PYTHON) generate_report.py
 	@echo "All outputs regenerated."
+
+clean:
+	rm -f data/wahlbezirk_lr_predictions.csv
+	rm -f data/*_calibration.csv data/*_registry.csv
+	rm -f data/*_registry.json data/*_anomalies_bb.csv
+	rm -f data/neighborhood_credibility.csv
+	@echo "Cleaned generated outputs."

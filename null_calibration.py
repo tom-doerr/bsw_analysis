@@ -129,7 +129,8 @@ def _run_sims(g, bp, rho, obs_f, obs_pi):
 
 
 def _report(nf, npi, obs_f, obs_pi):
-    pf = (nf >= obs_f).mean()
+    # +1 correction for p-values
+    pf = ((nf >= obs_f).sum()+1) / (len(nf)+1)
     fp = np.percentile(nf, [5, 50, 95])
     print(f"\n{SEP}\nFLAG RATE CALIBRATION\n{SEP}")
     print(f"  Null: med={fp[1]:.0f}"
@@ -138,7 +139,7 @@ def _report(nf, npi, obs_f, obs_pi):
     print(f"  P(null>=obs): {pf:.4f}")
     print(f"  Excess: {obs_f-fp[1]:.0f}")
 
-    pp = (npi >= obs_pi).mean()
+    pp = ((npi >= obs_pi).sum()+1) / (len(npi)+1)
     pip = np.percentile(npi, [5, 50, 95])
     print(f"\n{SEP}\nLATENT π CALIBRATION\n{SEP}")
     print(f"  Null π: med={pip[1]:.4f}"
@@ -151,11 +152,15 @@ def _report(nf, npi, obs_f, obs_pi):
 def _save(of, fp, pf, opi, pip, pp):
     rows = [
         dict(metric="flags_obs", value=of),
+        dict(metric="flags_null_p5", value=fp[0]),
         dict(metric="flags_null_med", value=fp[1]),
-        dict(metric="flags_p", value=pf),
+        dict(metric="flags_null_p95", value=fp[2]),
+        dict(metric="flags_p", value=round(pf, 4)),
         dict(metric="pi_obs", value=opi),
+        dict(metric="pi_null_p5", value=pip[0]),
         dict(metric="pi_null_med", value=pip[1]),
-        dict(metric="pi_p", value=pp)]
+        dict(metric="pi_null_p95", value=pip[2]),
+        dict(metric="pi_p", value=round(pp, 4))]
     pd.DataFrame(rows).to_csv(
         DATA/"null_calibration.csv", index=False)
     print(f"\n  Saved → null_calibration.csv")
