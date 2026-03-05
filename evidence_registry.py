@@ -107,6 +107,7 @@ def compute_scores(df, pred):
         "bsw_resid": np.round(bsw_resid, 3),
         "bsw_resid_z": np.round(bsw_resid_z, 3),
         "p_bsw_zero": np.round(p_zero, 6),
+        "log10_p0_bb": np.log10(np.maximum(p_zero, 1e-300)),
         "bd_pctile_land": np.round(bd_pctile, 4),
     })
     return scores

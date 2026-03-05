@@ -32,6 +32,8 @@ Repo: `~/git/bsw_analysis` (github.com/tom-doerr/bsw_analysis)
 - `brief_colocation.py` — Briefwahl gap co-location with registry
 - `bb_utils.py` — Shared BB p0 and rho estimation
 - `top_anomalies_bb.py` — Top 200 BB-surviving anomaly case file
+- `null_calibration.py` — Null simulation calibration (BB world)
+- `neighborhood_credibility.py` — Neighbor context for anomalies
 
 ## Data (`data/`)
 - `btw{25,21,17,13}_wbz.zip` — Precinct-level election results
@@ -83,6 +85,7 @@ Repo: `~/git/bsw_analysis` (github.com/tom-doerr/bsw_analysis)
 ## Evidence Registry
 - 3,722 flagged precincts by 4 criteria (BB P(0), BD rank pctile)
 - Now uses Beta-Binomial p0 via bb_utils
+- Stores log10_p0_bb for ranking (no rounding loss)
 - BB-calibrated excess: HE +19.4, NI +18.0, BY +3.9
 - Output: data/evidence_registry.csv + .json
 
@@ -120,9 +123,10 @@ Repo: `~/git/bsw_analysis` (github.com/tom-doerr/bsw_analysis)
 - 71% Jaccard overlap of suspicious precincts
 - Spearman ρ=0.898, Top-20: 80%, Top-50: 92%
 
-## Pipeline Consistency (v3)
+## Pipeline Consistency (v4)
 - All scripts use bb_utils.estimate_rho + bb_p0
 - Shared module: bb_utils.py
+- Makefile for full reproducibility (`make all`)
 - Updated: registry, latent_class, triangulation,
   clustering, brief_colocation, recount_bias
 
@@ -132,11 +136,29 @@ Repo: `~/git/bsw_analysis` (github.com/tom-doerr/bsw_analysis)
 - Concentrated in λ=10-50 range
 - Output: data/top_anomalies_bb.csv
 
+## Null Simulation Calibration
+- 200 BB(p,ρ) null worlds, no fraud
+- **Flag rate: SIGNIFICANT (p=0.000)**
+- Null flags: med=31 [23, 43], observed=74, excess=43
+- **Latent π: NOT significant (p=0.29)**
+- Null π: med=0.2431, observed=0.2439
+- Conclusion: excess zeros are real; π is artifact
+
+## Neighborhood Credibility
+- 74 anomalies, 72 with Gemeinde neighbors
+- 97.6% of neighbors have BSW>0
+- Top: Rieneck λ=37.8 (37 nbr, all BSW>0, EW24=4.2%)
+- EW24 confirms BSW presence in anomaly Gemeinden
+- Output: data/neighborhood_credibility.csv
+
 ## Latent-Class π Inference
 - Continuous Gaussian EM (not binary), identifiable
 - π=24.4% [23.9%, 24.9%] anomalous component
 - μ(-log10 p0): prob=11.67, norm=5.30
 - P(cross)=92.5% (high π drives this)
+- **NULL CALIBRATED: π NOT significant (p=0.29)**
+- Null π median=0.2431 — mixture finds tails, not fraud
+- Downgraded to Tier B (speculative)
 
 ## Geographic Clustering
 - BB-calibrated: 74 suspicious (was 108 with Binomial)
