@@ -34,6 +34,8 @@ Repo: `~/git/bsw_analysis` (github.com/tom-doerr/bsw_analysis)
 - `top_anomalies_bb.py` — Top 200 BB-surviving anomaly case file
 - `null_calibration.py` — Null simulation calibration (BB world)
 - `neighborhood_credibility.py` — Neighbor context for anomalies
+- `ballot_order.py` — Ballot adjacency analysis (official order)
+- `rws_brief_urne.py` — RWS brief/urne demographic decomposition
 
 ## Data (`data/`)
 - `btw{25,21,17,13}_wbz.zip` — Precinct-level election results
@@ -42,6 +44,10 @@ Repo: `~/git/bsw_analysis` (github.com/tom-doerr/bsw_analysis)
 - `ew24_strukturdaten.csv` — EW24 Strukturdaten
 - `btw2025_brief_wkr.csv` — 2025 Wahlkreis-level aggregated
 - `btw2025kreis.csv` — 2025 Kreis-level aggregated
+- `btw25_parteireihenfolge_laender.csv` — Official ballot order per Land
+- `btw25_rws_bst2-ba.csv` — RWS vote by brief/urne × age × sex
+- `btw25_rws_bst2.csv` — RWS vote by age × sex
+- `lt2024_bb.xlsx` — Brandenburg LT2024 precinct results
 
 ## Data Format Quirks
 - 2025 CSVs: skiprows=4, semicolon-sep, UTF-8-BOM
@@ -150,6 +156,25 @@ Repo: `~/git/bsw_analysis` (github.com/tom-doerr/bsw_analysis)
 - Top: Rieneck λ=37.8 (37 nbr, all BSW>0, EW24=4.2%)
 - EW24 confirms BSW presence in anomaly Gemeinden
 - Output: data/neighborhood_credibility.csv
+
+## Ballot Order Analysis
+- Official data: btw25_parteireihenfolge_laender.csv
+- BSW directly below BD on ballot in 15/16 Länder (not SL)
+- All 74 suspicious zeros in adjacent-ballot states (0 in SL)
+- BD share 8.8x higher in suspicious (1.40%) vs all (0.16%)
+- BSW=0 precincts: BD 0.42% vs BSW>0: BD 0.16% (2.6x)
+
+## RWS Brief/Urne Decomposition
+- Official Repräsentative Wahlstatistik
+- BSW: Urne 5.20%, Brief 4.54%, raw gap +0.66pp
+- **Demographics explain 100%**: residual -0.013pp
+- AfD: +12.03pp raw, +0.79pp residual (social desirability)
+- Brief gap is demographic, not miscount
+
+## Brandenburg LT2024 Validation
+- 3,925 precincts, BSW=13.0% (EW24=13.4%)
+- EW24↔LT24 BSW: r=0.695 (weighted r=0.905)
+- External validation of BSW geographic consistency
 
 ## Latent-Class π Inference
 - Continuous Gaussian EM (not binary), identifiable

@@ -1,0 +1,17 @@
+land,adj,n_susp,n_total,rate
+BB,True,1,3963,0.0252
+BE,True,0,3598,0.0
+BW,True,5,11490,0.0435
+BY,True,35,18087,0.1935
+HB,True,0,595,0.0
+HE,True,7,6935,0.1009
+HH,True,4,1998,0.2002
+MV,True,1,1986,0.0504
+NI,True,10,9696,0.1031
+NW,True,4,16938,0.0236
+RP,True,3,5381,0.0558
+SH,True,3,3052,0.0983
+SL,False,0,1141,0.0
+SN,True,1,4556,0.0219
+ST,True,0,2637,0.0
+TH,True,0,2993,0.0
