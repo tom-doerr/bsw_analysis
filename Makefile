@@ -17,6 +17,7 @@ evidence: predictions
 	$(PYTHON) top_anomalies_bb.py
 	$(PYTHON) calibrate_zero_betabinom.py
 	$(PYTHON) triangulate_lr_xgb.py
+	$(PYTHON) evidence_dossier.py
 
 modeling: predictions
 	$(PYTHON) latent_class_pi.py
@@ -45,4 +46,5 @@ clean:
 	rm -f data/*_calibration.csv data/*_registry.csv
 	rm -f data/*_registry.json data/*_anomalies_bb.csv
 	rm -f data/neighborhood_credibility.csv
+	rm -f data/evidence_dossier.csv data/evidence_dossier.json
 	@echo "Cleaned generated outputs."

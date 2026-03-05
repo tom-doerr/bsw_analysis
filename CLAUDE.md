@@ -36,6 +36,7 @@ Repo: `~/git/bsw_analysis` (github.com/tom-doerr/bsw_analysis)
 - `neighborhood_credibility.py` — Neighbor context for anomalies
 - `ballot_order.py` — Ballot adjacency analysis (official order)
 - `rws_brief_urne.py` — RWS brief/urne demographic decomposition
+- `evidence_dossier.py` — Per-precinct evidence dossier (26 cols)
 
 ## Data (`data/`)
 - `btw{25,21,17,13}_wbz.zip` — Precinct-level election results
@@ -170,6 +171,15 @@ Repo: `~/git/bsw_analysis` (github.com/tom-doerr/bsw_analysis)
 - **Demographics explain 100%**: residual -0.013pp
 - AfD: +12.03pp raw, +0.79pp residual (social desirability)
 - Brief gap is demographic, not miscount
+
+## Evidence Dossier
+- 74 BB-suspicious precincts, 26 columns per row
+- Merges: core stats, neighbors, EW24, ballot order, RWS
+- 49 Urne (587 exp) + 25 Brief (408 exp)
+- All 74 in ballot-adjacent states (BSW next to BD)
+- BY: 35, NI: 10, HE: 7, BW: 5
+- Top λ: Rieneck(37.8), Flensburg(35.4), Wedel(34.0)
+- Output: data/evidence_dossier.csv + .json
 
 ## Brandenburg LT2024 Validation
 - 3,925 precincts, BSW=13.0% (EW24=13.4%)
