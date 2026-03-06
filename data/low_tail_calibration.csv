@@ -1,0 +1,13 @@
+m,v
+n_obs,670.0
+n_med,651.0
+n_p5,604.9
+n_p95,694.0
+n_p,0.209
+miss_obs,14547.2
+miss_med,11851.8
+miss_p5,10958.8
+miss_p95,12783.7
+miss_p,0.005
+excess_n,19.0
+excess_miss,2695.4

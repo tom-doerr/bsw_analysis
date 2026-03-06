@@ -36,7 +36,9 @@ Repo: `~/git/bsw_analysis` (github.com/tom-doerr/bsw_analysis)
 - `neighborhood_credibility.py` — Neighbor context for anomalies
 - `ballot_order.py` — Ballot adjacency analysis (official order)
 - `rws_brief_urne.py` — RWS brief/urne demographic decomposition
-- `evidence_dossier.py` — Per-precinct evidence dossier (26 cols)
+- `evidence_dossier.py` — Per-precinct evidence dossier (35 cols)
+- `low_tail_undercount.py` — Low-tail BB undercount (BSW>0 too)
+- `bsw_bd_swap.py` — BSW→BD swap misallocation model
 
 ## Data (`data/`)
 - `btw{25,21,17,13}_wbz.zip` — Precinct-level election results
@@ -173,13 +175,28 @@ Repo: `~/git/bsw_analysis` (github.com/tom-doerr/bsw_analysis)
 - Brief gap is demographic, not miscount
 
 ## Evidence Dossier
-- 74 BB-suspicious precincts, 26 columns per row
-- Merges: core stats, neighbors, EW24, ballot order, RWS
-- 49 Urne (587 exp) + 25 Brief (408 exp)
-- All 74 in ballot-adjacent states (BSW next to BD)
-- BY: 35, NI: 10, HE: 7, BW: 5
-- Top λ: Rieneck(37.8), Flensburg(35.4), Wedel(34.0)
+- 74 BB-suspicious precincts, 35 columns per row
+- Merges: core, neighbors, EW24, ballot, RWS, registry
+- Stable IDs: land_code, kreis_code, gemeinde_code, wbz
+- EW24 Land-level fallback for city-states (HH fixed)
+- Registry fields merged: flags, recount_status, source, claim
 - Output: data/evidence_dossier.csv + .json
+
+## Low-Tail Undercount Analysis
+- P(BSW≤obs) under BB for ALL precincts, not just BSW=0
+- **670 low-tail precincts** (74 zeros + 596 BSW>0)
+- Total expected missing: 14,547
+- **Null-calibrated excess: 2,695 votes (p=0.005)**
+- Count not significant (p=0.21), missing votes IS significant
+- λ 20-50 bin: 289 precincts, 6,069 missing
+
+## BSW→BD Swap Model
+- Compares BD rate in adjacent vs SL (non-adjacent) states
+- **No swap signal**: BD lower in adjacent (0.153%) than SL (0.248%)
+- q=0.000, estimated swapped=0 votes
+- Confound: East states have both high BD and high BSW
+- SL is poor control (Western but high BD for West)
+- Placebo: FDP +0.04pp, Linke +1.44pp (East effect)
 
 ## Brandenburg LT2024 Validation
 - 3,925 precincts, BSW=13.0% (EW24=13.4%)

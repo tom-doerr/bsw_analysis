@@ -57,9 +57,16 @@ def load_ew24_gem():
     g = d.groupby("gk")[[v,"BSW"]].sum().reset_index()
     s = np.where(g[v]>0, g[v], 1)
     g["pct"] = g["BSW"]/s*100
+    # Land-level fallback for city-states
+    dl = d.groupby("Land")[[v,"BSW"]].sum().reset_index()
+    sl = np.where(dl[v]>0, dl[v], 1)
+    dl["pct"] = dl["BSW"]/sl*100
+    lf = dict(zip(dl["Land"],dl["pct"]))
+    lv = dict(zip(dl["Land"],dl["BSW"]))
+    lt = dict(zip(dl["Land"],dl[v]))
     return (dict(zip(g["gk"],g["pct"])),
         dict(zip(g["gk"],g["BSW"])),
-        dict(zip(g["gk"],g[v])))
+        dict(zip(g["gk"],g[v])),lf,lv,lt)
 
 
 def load_ballot_order():
@@ -74,6 +81,29 @@ def ballot_ctx(land, order):
         d = abs(rb-rd)
         return rb, rd, d, d==1
     return rb, rd, None, None
+
+
+def _merge_reg(r, reg):
+    """Merge registry fields into dossier row."""
+    r["flags"]=""; r["recount_status"]=""
+    r["source"]=""; r["claim"]=""
+    if reg is None: return
+    m = (reg["land"]==r["land"])&(reg["wahlkreis"]==r["wkr"])
+    m = m&(reg["bsw_votes"]==r["bsw"])
+    m = m&(reg["valid_total"]==r["valid"])
+    hits = reg[m]
+    if len(hits)==0: return
+    h = hits.iloc[0]
+    r["flags"]=h.get("flags","")
+    r["recount_status"]=h.get("recount_status","")
+    r["source"]=h.get("source","")
+    r["claim"]=h.get("claim","")
+
+
+def _load_registry():
+    p = DATA/"evidence_registry.csv"
+    if not p.exists(): return None
+    return pd.read_csv(p,low_memory=False)
 
 
 def build_core(df, pred, lc):
@@ -93,9 +123,14 @@ def build_core(df, pred, lc):
         df.iloc[:,0]),errors="coerce").fillna(0).astype(int).values
     ba=df["Bezirksart"].values.astype(int)
     gk=_gem_key(df).values
+    wbz=df.get("Wahlbezirk",pd.Series([""]*len(df))).values
+    lc_raw=pd.to_numeric(df["Land"],errors="coerce").fillna(0).astype(int).values
+    kc=pd.to_numeric(df["Kreis"],errors="coerce").fillna(0).astype(int).values
+    gc=pd.to_numeric(df["Gemeinde"],errors="coerce").fillna(0).astype(int).values
     return dict(g=g,bsw=bsw,bd=bd,bp=bp,rho=rho,
         p0=p0,lam=bp*g,susp=susp,ln=ln,gem=gem,
-        wkr=wkr,ba=ba,gk=gk)
+        wkr=wkr,ba=ba,gk=gk,wbz=wbz,
+        lc_raw=lc_raw,kc=kc,gc=gc)
 
 
 def nbr_ctx(idx, c):
@@ -113,8 +148,9 @@ def nbr_ctx(idx, c):
 def build_dossier(df, pred, lc):
     print("Building dossier...")
     c = build_core(df, pred, lc)
-    ew_pct, ew_v, ew_t = load_ew24_gem()
+    ew_pct,ew_v,ew_t,ew_lp,ew_lv,ew_lt = load_ew24_gem()
     order, _ = load_ballot_order()
+    reg = _load_registry()
     rws_p = DATA/"rws_decomposition.csv"
     rws = pd.read_csv(rws_p) if rws_p.exists() else None
     bsw_rws = None
@@ -127,14 +163,22 @@ def build_dossier(df, pred, lc):
     rows = []
     for i in idx:
         rows.append(_one_row(i, c, ew_pct, ew_v,
-            ew_t, order, bsw_rws))
+            ew_t, ew_lp, ew_lv, ew_lt,
+            order, bsw_rws, reg))
     return pd.DataFrame(rows)
 
 
-def _one_row(i, c, ew_pct, ew_v, ew_t, order, rws):
+def _one_row(i, c, ew_pct, ew_v, ew_t,
+             ew_lp, ew_lv, ew_lt,
+             order, rws, reg):
     gk = c["gk"][i]
     ba = {0:"Urne",5:"Brief"}.get(c["ba"][i],str(c["ba"][i]))
+    lk = str(c["lc_raw"][i]).zfill(2)
     r = dict(land=c["ln"][i], wkr=int(c["wkr"][i]),
+        land_code=int(c["lc_raw"][i]),
+        kreis_code=int(c["kc"][i]),
+        gemeinde_code=int(c["gc"][i]),
+        wbz=str(c["wbz"][i]),
         gemeinde=c["gem"][i], bezirksart=ba,
         valid=int(c["g"][i]), bsw=int(c["bsw"][i]),
         bd=int(c["bd"][i]),
@@ -148,10 +192,22 @@ def _one_row(i, c, ew_pct, ew_v, ew_t, order, rws):
     nn,ng,med,mx = nbr_ctx(i, c)
     r.update(n_nbr=nn, nbr_gt0=ng,
         nbr_med_pct=med, nbr_max_bsw=mx)
-    # EW24
-    r["ew24_pct"] = round(ew_pct[gk],2) if gk in ew_pct else None
-    r["ew24_votes"] = int(ew_v[gk]) if gk in ew_v else None
-    r["ew24_valid"] = int(ew_t[gk]) if gk in ew_t else None
+    # EW24 (Land-level fallback for city-states)
+    if gk in ew_pct:
+        r["ew24_pct"] = round(ew_pct[gk],2)
+        r["ew24_votes"] = int(ew_v[gk])
+        r["ew24_valid"] = int(ew_t[gk])
+        r["ew24_level"] = "gemeinde"
+    elif lk in ew_lp:
+        r["ew24_pct"] = round(ew_lp[lk],2)
+        r["ew24_votes"] = int(ew_lv[lk])
+        r["ew24_valid"] = int(ew_lt[lk])
+        r["ew24_level"] = "land"
+    else:
+        r["ew24_pct"] = None
+        r["ew24_votes"] = None
+        r["ew24_valid"] = None
+        r["ew24_level"] = None
     # Ballot order
     rb,rd,d,adj = ballot_ctx(c["ln"][i], order)
     r.update(bsw_pos=rb, bd_pos=rd,
@@ -161,6 +217,8 @@ def _one_row(i, c, ew_pct, ew_v, ew_t, order, rws):
         r["rws_urne"]=rws.get("urne")
         r["rws_brief"]=rws.get("brief")
         r["rws_resid"]=rws.get("resid")
+    # Registry fields
+    _merge_reg(r, reg)
     return r
 
 

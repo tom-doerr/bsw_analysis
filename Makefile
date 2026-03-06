@@ -24,6 +24,8 @@ modeling: predictions
 	$(PYTHON) bsw_generative.py
 	$(PYTHON) bsw_bayesian.py
 	$(PYTHON) null_calibration.py
+	$(PYTHON) low_tail_undercount.py
+	$(PYTHON) bsw_bd_swap.py
 
 spatial: predictions
 	$(PYTHON) clustering_test.py
