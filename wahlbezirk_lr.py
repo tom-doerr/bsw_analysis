@@ -9,9 +9,9 @@ from zipfile import ZipFile
 import numpy as np
 import pandas as pd
 from scipy.stats import spearmanr
-from sklearn.linear_model import LinearRegression
+from sklearn.linear_model import Ridge
 from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
-from sklearn.model_selection import KFold, cross_val_predict
+from sklearn.model_selection import GroupKFold, cross_val_predict
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
 
@@ -318,13 +318,30 @@ def build_X_base(e_feat, struct25, wkr, land, hist21, hist17):
     return pd.concat(parts, axis=1)
 
 
-def train_party(X, y, cv):
+def build_X_strict(struct25, wkr, land, hist21, hist17):
+    """Independence-first: no 2025 Erststimmen (e25_*)."""
+    n = len(wkr)
+    parts = [pd.DataFrame(struct25, index=range(n))]
+    wkr_s = pd.Series(wkr, name="Wahlkreis")
+    for hist in [hist21, hist17]:
+        m = wkr_s.to_frame().merge(hist, on="Wahlkreis", how="left")
+        m = m.drop(columns="Wahlkreis").fillna(0)
+        parts.append(m.reset_index(drop=True))
+    land_df = pd.get_dummies(
+        pd.Series(land, name="land"), prefix="land", drop_first=True
+    ).reset_index(drop=True)
+    parts.append(land_df)
+    return pd.concat(parts, axis=1)
+
+
+def train_party(X, y, cv, groups=None):
     """Train LR for one party, return CV predictions."""
     pipe = Pipeline([
         ("scale", StandardScaler()),
-        ("lr", LinearRegression()),
+        ("lr", Ridge(alpha=5000)),
     ])
-    return cross_val_predict(pipe, X, y, cv=cv)
+    yp = cross_val_predict(pipe, X, y, cv=cv, groups=groups)
+    return np.clip(yp, 0, 100)
 
 
 def compute_metrics(y_true, y_pred):
@@ -363,7 +380,7 @@ def main():
     print(f"  Base features: {base.shape[1]}")
 
     parties = sorted(z_map.keys())
-    cv = KFold(n_splits=10, shuffle=True, random_state=SEED)
+    cv = GroupKFold(n_splits=10)
     # No z25 shares as features (they sum to 100% → leakage)
     X = base.values.astype(np.float64)
     results = {}
@@ -373,7 +390,7 @@ def main():
           flush=True)
     for i, party in enumerate(parties):
         y = z_map[party]
-        y_pred = train_party(X, y, cv)
+        y_pred = train_party(X, y, cv, groups=wkr)
         results[party] = compute_metrics(y, y_pred)
         preds[party] = {"actual": y, "predicted": y_pred}
         print(f"  [{i+1}/{len(parties)}] {party}: "
@@ -416,9 +433,40 @@ def main():
     # === BSW top over/under predictions ===
     _print_bsw_top(preds, meta)
 
-    # === Save CSVs ===
-    _save_csvs(res_df, preds, anom_df, meta, parties)
+    # === Independence-first model (no e25, + EW24 + SD) ===
+    strict = build_X_strict(struct25, wkr, land, hist21, hist17)
+    strict = _add_ew24_sd(strict, df25, wkr)
+    Xs = strict.values.astype(np.float64)
+    print(f"\n{'='*70}")
+    print(f"Strict model (no e25): {Xs.shape[1]} features")
+    print(f"{'='*70}")
+    bsw_strict = train_party(Xs, z_map["BSW"], cv, groups=wkr)
+    r2s = r2_score(z_map["BSW"], bsw_strict)
+    print(f"  BSW strict R²={r2s:.4f}")
 
+    # === Leave-one-Land-out ===
+    _lolo_check(X, z_map, land)
+
+    # === Save CSVs ===
+    _save_csvs(res_df, preds, anom_df, meta, parties,
+               bsw_strict=bsw_strict)
+
+
+def _add_ew24_sd(s,df25,wkr):
+    from xgb_enhanced import load_ew24,load_strukturdaten
+    ew=load_ew24();sd=load_strukturdaten()
+    d=df25[df25["Gültige - Zweitstimmen"].apply(
+        pd.to_numeric,errors="coerce").fillna(0)>=1
+    ].copy().reset_index(drop=True)
+    for c in ["Land","Kreis","Gemeinde"]:
+        d[c]=d[c].astype(str).str.zfill(2 if c!="Gemeinde" else 3)
+    gk=d["Land"]+"_"+d["Kreis"]+"_"+d["Gemeinde"]
+    e=gk.to_frame("gem_key").merge(ew,on="gem_key",how="left")
+    e=e.drop(columns="gem_key").fillna(0).reset_index(drop=True)
+    w=pd.Series(wkr,name="Wahlkreis")
+    m=w.to_frame().merge(sd,on="Wahlkreis",how="left")
+    m=m.drop(columns="Wahlkreis").fillna(0).reset_index(drop=True)
+    return pd.concat([s,e,m],axis=1)
 
 def _find_anomalies(parties, preds, meta):
     """Find precincts with |z-score| > 2.0."""
@@ -476,7 +524,34 @@ def _print_bsw_top(preds, meta):
             f"{resid[idx]:+.2f}"))
 
 
-def _save_csvs(res_df, preds, anom_df, meta, parties):
+def _lolo_check(X, z_map, land):
+    """Leave-one-Land-out for BSW."""
+    from sklearn.model_selection import LeaveOneGroupOut
+    lolo = LeaveOneGroupOut()
+    y = z_map["BSW"]
+    pipe = Pipeline([
+        ("s", StandardScaler()),
+        ("lr", Ridge(alpha=5000)),
+    ])
+    yp = cross_val_predict(
+        pipe, X, y, cv=lolo, groups=land)
+    yp = np.clip(yp, 0, 100)
+    r2 = r2_score(y, yp)
+    print(f"\n{'='*70}")
+    print("Leave-one-Land-out (BSW)")
+    print(f"{'='*70}")
+    print(f"  R²={r2:.4f}")
+    # Per-Land R²
+    for l in sorted(set(land)):
+        m = land == l
+        if m.sum() < 10:
+            continue
+        lr = r2_score(y[m], yp[m])
+        print(f"  Land {l}: R²={lr:.4f} (n={m.sum()})")
+
+
+def _save_csvs(res_df, preds, anom_df, meta, parties,
+               bsw_strict=None):
     """Save results to CSV files."""
     out = DATA / "wahlbezirk_lr_metrics.csv"
     res_df.to_csv(out)
@@ -488,6 +563,8 @@ def _save_csvs(res_df, preds, anom_df, meta, parties):
         pred_df[f"{party}_actual"] = a
         pred_df[f"{party}_pred"] = p
         pred_df[f"{party}_resid"] = a - p
+    if bsw_strict is not None:
+        pred_df["BSW_pred_strict"] = bsw_strict
     out2 = DATA / "wahlbezirk_lr_predictions.csv"
     pred_df.to_csv(out2, index=False)
     print(f"Wrote {out2}")

@@ -5,9 +5,9 @@ examine within-sum split for vote swapping evidence."""
 import numpy as np
 import pandas as pd
 from scipy.stats import spearmanr
-from sklearn.linear_model import LinearRegression
+from sklearn.linear_model import Ridge
 from sklearn.metrics import r2_score, mean_absolute_error
-from sklearn.model_selection import KFold, cross_val_predict
+from sklearn.model_selection import GroupKFold, cross_val_predict
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
 
@@ -21,7 +21,7 @@ from wahlbezirk_lr import (
 def make_pipe():
     return Pipeline([
         ("scale", StandardScaler()),
-        ("lr", LinearRegression()),
+        ("lr", Ridge(alpha=5000)),
     ])
 
 
@@ -36,17 +36,18 @@ def load_all():
     print("Building features...")
     base = build_X_base(e_feat, struct25, wkr, land, hist21, hist17)
     X = base.values.astype(np.float64)
-    cv = KFold(n_splits=10, shuffle=True, random_state=SEED)
-    return X, z_map, meta, cv
+    cv = GroupKFold(n_splits=10)
+    return X, z_map, meta, cv, wkr
 
 
-def step1_predictability(X, z_map, cv):
+def step1_predictability(X, z_map, cv, groups=None):
     bsw = z_map["BSW"]
     bd = z_map["BÜNDNIS DEUTSCHLAND"]
     combo = bsw + bd
-    pb = cross_val_predict(make_pipe(), X, bsw, cv=cv)
-    pd_ = cross_val_predict(make_pipe(), X, bd, cv=cv)
-    pc = cross_val_predict(make_pipe(), X, combo, cv=cv)
+    kw = dict(groups=groups) if groups is not None else {}
+    pb = cross_val_predict(make_pipe(), X, bsw, cv=cv, **kw)
+    pd_ = cross_val_predict(make_pipe(), X, bd, cv=cv, **kw)
+    pc = cross_val_predict(make_pipe(), X, combo, cv=cv, **kw)
     print(f"\n{'='*60}")
     print("Step 1: Predictability comparison")
     print(f"{'='*60}")
@@ -64,7 +65,7 @@ def step1_predictability(X, z_map, cv):
     return bsw, bd, combo, pb, pd_, pc
 
 
-def step2_within_sum(X, bsw, bd, combo, cv):
+def step2_within_sum(X, bsw, bd, combo, cv, groups=None):
     print(f"\n{'='*60}")
     print("Step 2: Within-sum split analysis")
     print(f"{'='*60}")
@@ -74,8 +75,9 @@ def step2_within_sum(X, bsw, bd, combo, cv):
     print(f"  Mean BSW/(BSW+BD): {np.nanmean(frac):.4f}")
     print(f"  Std  BSW/(BSW+BD): {np.nanstd(frac):.4f}")
     valid = mask & np.isfinite(frac)
+    g = groups[valid] if groups is not None else None
     pf = cross_val_predict(make_pipe(), X[valid],
-                            frac[valid], cv=cv)
+        frac[valid], cv=cv, groups=g)
     r2f = r2_score(frac[valid], pf)
     rhof = spearmanr(frac[valid], pf)[0]
     print(f"  Predicting BSW/(BSW+BD) fraction:")
@@ -129,7 +131,7 @@ def step5_land_breakdown(X, bsw, combo, frac, valid, meta, cv):
               f"  {np.nanstd(fr):8.4f}  {m.sum():6d}")
 
 
-def step6_controls(X, z_map, cv):
+def step6_controls(X, z_map, cv, groups=None):
     print(f"\n{'='*60}")
     print("Step 6: Control — other party pairs")
     print(f"{'='*60}")
@@ -149,9 +151,10 @@ def step6_controls(X, z_map, cv):
             continue
         ya, yb = z_map[pa], z_map[pb]
         ys = ya + yb
-        ppa = cross_val_predict(make_pipe(), X, ya, cv=cv)
-        ppb = cross_val_predict(make_pipe(), X, yb, cv=cv)
-        pps = cross_val_predict(make_pipe(), X, ys, cv=cv)
+        kw = dict(groups=groups) if groups is not None else {}
+        ppa = cross_val_predict(make_pipe(), X, ya, cv=cv, **kw)
+        ppb = cross_val_predict(make_pipe(), X, yb, cv=cv, **kw)
+        pps = cross_val_predict(make_pipe(), X, ys, cv=cv, **kw)
         r2a = r2_score(ya, ppa)
         r2b = r2_score(yb, ppb)
         r2s = r2_score(ys, pps)
@@ -161,14 +164,16 @@ def step6_controls(X, z_map, cv):
 
 
 def main():
-    X, z_map, meta, cv = load_all()
-    out = step1_predictability(X, z_map, cv)
+    X, z_map, meta, cv, wkr = load_all()
+    out = step1_predictability(X, z_map, cv, groups=wkr)
     bsw, bd, combo, pb, pd_, pc = out
-    frac, valid = step2_within_sum(X, bsw, bd, combo, cv)
+    frac, valid = step2_within_sum(
+        X, bsw, bd, combo, cv, groups=wkr)
     step3_residuals(bsw, bd, combo, pb, pd_, pc)
     step4_deviation_dist(bsw, combo, frac, valid)
-    step5_land_breakdown(X, bsw, combo, frac, valid, meta, cv)
-    step6_controls(X, z_map, cv)
+    step5_land_breakdown(
+        X, bsw, combo, frac, valid, meta, cv)
+    step6_controls(X, z_map, cv, groups=wkr)
     print(f"\n{'='*60}")
     print("Interpretation")
     print(f"{'='*60}")

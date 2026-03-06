@@ -11,7 +11,7 @@ from zipfile import ZipFile
 from scipy.stats import spearmanr
 from sklearn.metrics import r2_score, mean_absolute_error
 from sklearn.metrics import mean_squared_error
-from sklearn.model_selection import KFold, cross_val_predict
+from sklearn.model_selection import GroupKFold, cross_val_predict
 from xgboost import XGBRegressor
 import shap
 
@@ -122,18 +122,18 @@ def load_all():
     X = pd.concat([base.reset_index(drop=True),
                     ew_merged, sd_merged], axis=1)
     print(f"  Total features: {X.shape[1]}")
-    return X, z_map, meta
+    return X, z_map, meta, wkr
 
 
-def train_party(X, y, cv):
-    """Train XGBoost for one party with 10-fold CV."""
+def train_party(X, y, cv, groups=None):
+    """Train XGBoost for one party with GroupKFold CV."""
     xgb = XGBRegressor(
         n_estimators=300, max_depth=6, learning_rate=0.1,
         subsample=0.8, colsample_bytree=0.8,
         random_state=SEED, n_jobs=-1,
         tree_method="hist",
     )
-    return cross_val_predict(xgb, X, y, cv=cv)
+    return cross_val_predict(xgb, X, y, cv=cv, groups=groups)
 
 
 def compute_metrics(y, yp):
@@ -194,18 +194,18 @@ def compute_shap_summary(X, z_map, feature_names):
 
 
 def main():
-    X_df, z_map, meta = load_all()
+    X_df, z_map, meta, wkr = load_all()
     X = X_df.values.astype(np.float64)
     feature_names = list(X_df.columns)
     parties = sorted(z_map.keys())
-    cv = KFold(n_splits=10, shuffle=True, random_state=SEED)
+    cv = GroupKFold(n_splits=10)
     results = {}
     print(f"\nTraining {len(parties)} XGBoost models "
           f"({X.shape[1]} features, {X.shape[0]} rows)...",
           flush=True)
     for i, party in enumerate(parties):
         y = z_map[party]
-        yp = train_party(X, y, cv)
+        yp = train_party(X, y, cv, groups=wkr)
         results[party] = compute_metrics(y, yp)
         print(f"  [{i+1}/{len(parties)}] {party}: "
               f"R²={results[party]['R2']:.4f} "

@@ -34,6 +34,7 @@ spatial: predictions
 	$(PYTHON) neighborhood_credibility.py
 
 misc: predictions
+	$(PYTHON) official_corrections.py
 	$(PYTHON) bsw_recount_bias.py
 	$(PYTHON) bsw_affidavits.py
 	$(PYTHON) bsw_swing.py

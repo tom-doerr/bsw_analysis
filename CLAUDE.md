@@ -39,6 +39,7 @@ Repo: `~/git/bsw_analysis` (github.com/tom-doerr/bsw_analysis)
 - `evidence_dossier.py` — Per-precinct evidence dossier (35 cols)
 - `low_tail_undercount.py` — Low-tail BB undercount (BSW>0 too)
 - `bsw_bd_swap.py` — BSW→BD swap misallocation model
+- `official_corrections.py` — Prelim→final corrections (Arbeitstabelle 9)
 
 ## Data (`data/`)
 - `btw{25,21,17,13}_wbz.zip` — Precinct-level election results
@@ -63,11 +64,11 @@ Repo: `~/git/bsw_analysis` (github.com/tom-doerr/bsw_analysis)
 - Party name diffs: DIE LINKE (17/21) vs Die Linke (25)
 
 ## Key Findings
-- LR baseline: BSW R²=0.73 (rank 9/29), new party = hard to predict
-- XGBoost+EW24+SD: BSW R²=0.81 (+0.08), biggest major party gain
-- Top BSW features: 2017 Die Linke Erst (42%), EW24 BSW (17%), 2021 AfD (6%)
-- Major parties (CDU, AfD, CSU, GRÜNE, Die Linke, SPD) all R²>0.89
-- FDP also relatively hard (LR R²=0.65, XGB R²=0.70)
+- LR GroupKFold: BSW R²=0.63 (rank 9/29), new party = hard to predict
+- Strict model (no e25, +EW24+SD): BSW R²=0.64 (independence-first)
+- Leave-one-Land-out: BSW R²=0.04 (geographic extrapolation poor)
+- Major parties: CDU 0.96, AfD 0.96, SPD 0.85, Die Linke 0.86
+- FDP also hard: R²=0.59
 - BSW biggest anomalies in Brandenburg and Sachsen-Anhalt
 
 ## Forensic Results (no evidence of fraud)
@@ -83,6 +84,12 @@ Repo: `~/git/bsw_analysis` (github.com/tom-doerr/bsw_analysis)
 - Claim 2 (zero-vote precincts): 481 zeros (1.41x expected), max impact +2,873 votes (< 9,529 needed)
 - Claim 3 (extrapolation from 50 recounts): sample biased (BSW-selected), not representative
 - Claim 4 (disproportionate corrections): selection bias makes analysis uninformative
+
+## Official Corrections (Arbeitstabelle 9)
+- BSW: +4,277 Zweitstimmen (prelim→final) = 44.9% of 9,529 deficit
+- BD: -2,640 (lost votes while BSW gained)
+- Valid total: 49,649,512 (Δ+7,425)
+- Gap: 4.981% → 5.000% needs +9,529 votes
 
 ## BSW Evidence Analysis (case for 5%)
 - Counterfactual (visibility): 131k, reported separately
@@ -132,12 +139,13 @@ Repo: `~/git/bsw_analysis` (github.com/tom-doerr/bsw_analysis)
 - 71% Jaccard overlap of suspicious precincts
 - Spearman ρ=0.898, Top-20: 80%, Top-50: 92%
 
-## Pipeline Consistency (v4)
+## Pipeline Consistency (v5)
 - All scripts use bb_utils.estimate_rho + bb_p0
+- GroupKFold(10) by Wahlkreis (honest geographic CV)
+- Ridge(alpha=5000) instead of LinearRegression
+- Strict model: no e25_*, +EW24+Strukturdaten (R²=0.64)
 - Shared module: bb_utils.py
 - Makefile: `make all` (full), `make clean` (reset)
-- Updated: registry, latent_class, triangulation,
-  clustering, brief_colocation, recount_bias
 
 ## Top BB Anomalies Case File
 - 74 BB-suspicious BSW=0 precincts

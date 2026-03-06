@@ -35,13 +35,12 @@ def get_lr_pred():
 def get_xgb_pred(df):
     """Generate XGB CV predictions for BSW only."""
     from xgb_enhanced import load_all, train_party
-    from sklearn.model_selection import KFold
-    from wahlbezirk_lr import SEED
+    from sklearn.model_selection import GroupKFold
     print("  Training XGB for BSW...")
-    X_df, z_map, _ = load_all()
+    X_df, z_map, _, wkr = load_all()
     X = X_df.values.astype(np.float64)
-    cv = KFold(10, shuffle=True, random_state=SEED)
-    yp = train_party(X, z_map["BSW"], cv)
+    cv = GroupKFold(n_splits=10)
+    yp = train_party(X, z_map["BSW"], cv, groups=wkr)
     y = z_map["BSW"]
     return y, yp
 
