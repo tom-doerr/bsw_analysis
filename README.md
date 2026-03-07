@@ -29,7 +29,7 @@ Datenquelle: © Die Bundeswahlleiterin, Wiesbaden 2025 ([bundeswahlleiterin.de](
 - `bsw_forensic.py` — 11-test forensic battery for missing votes
 - `bsw_claims_test.py` — Tests BSW's 4 specific claims about miscounting
 - `xgb_enhanced.py` — XGBoost + Europawahl 2024 + Strukturdaten
-- `bsw_evidence.py` — 7-analysis case for BSW crossing 5%
+- `bsw_evidence.py` — scenario analysis for BSW crossing 5%
 - `bsw_bayesian.py` — Bayesian posterior P(Δ≥9,529)
 - `bsw_power.py` — Power analysis for forensic battery
 - `panel_analysis.py` — Gemeinde-level 4-election panel
@@ -75,8 +75,8 @@ Erststimmen.
 | FDP | 0.59 | |
 
 BSW R²=0.64 with the strict model confirms predictions do not
-depend on same-election features. Leave-one-Land-out: R²=0.04
-(geographic extrapolation is poor for new parties).
+depend on same-election features. Leave-one-Land-out: R²=0.38
+(strict model generalizes better than base R²=0.04).
 
 ### BSW Feature Importances (XGBoost)
 
@@ -189,8 +189,8 @@ BSW got 4.981%, missing 5% by 9,529 votes (0.019pp).
 **Claim 1: Ballot confusion** — r=+0.004, no systematic
 swap detected. Would need ~12.5% of BD votes.
 
-**Claim 2: Zero-vote precincts** — 670 low-tail precincts.
-Null-calibrated excess: 2,695 votes (p=0.005).
+**Claim 2: Zero-vote precincts** — 784 low-tail precincts.
+Null-calibrated excess: 5,145 votes (p=0.005).
 
 **Claim 3: Recount extrapolation** — 50 BSW-selected
 recounts. Selection bias limits extrapolation.
@@ -218,7 +218,7 @@ All 3 affidavit cases matched.
 ## Recount Bias: Sensitivity Curve
 
 Rate θ=0.304 [0.18, 0.48]. If recounts represent only the
-104 suspicious precincts: ~31 votes (P=0%). Need f≥20%
+81 BB-suspicious precincts: ~25 votes (P=0%). Need f≥20%
 representativeness for any chance. f=30%: P=35.5%.
 
 ## Ballot Adjacency Natural Experiment
@@ -228,11 +228,12 @@ Logistic regression with controls: has_erst OR=1.12,
 **p=0.50** (not significant). FDP placebo: OR=1.54, p=0.04.
 BSW=0 concentrates in small precincts (471/517 in Q0).
 
-## Generative Model (no double-counting)
+## Generative Model (speculative)
 
 Swap + zero-out channels. Conservative: med=1,832, P=0%.
-Bias-adjusted Beta(1,9): med=7,175, **P=34%**.
-π sweep: P(≥9,529) crosses 50% at π≈20% of precincts.
+Bias-adjusted Beta(1,9): med=7,175, P=34%.
+Results are highly sensitive to π prior — treat as
+scenario exploration, not proof.
 
 ## Usage
 

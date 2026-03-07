@@ -444,8 +444,8 @@ def main():
     r2s = r2_score(z_map["BSW"], bsw_strict)
     print(f"  BSW strict R²={r2s:.4f}")
 
-    # === Leave-one-Land-out ===
-    _lolo_check(X, z_map, land)
+    # === Leave-one-Land-out (strict model) ===
+    _lolo_check(Xs, z_map, land)
 
     # === Save CSVs ===
     _save_csvs(res_df, preds, anom_df, meta, parties,

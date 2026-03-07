@@ -66,7 +66,7 @@ Repo: `~/git/bsw_analysis` (github.com/tom-doerr/bsw_analysis)
 ## Key Findings
 - LR GroupKFold: BSW R²=0.63 (rank 9/29), new party = hard to predict
 - Strict model (no e25, +EW24+SD): BSW R²=0.64 (independence-first)
-- Leave-one-Land-out: BSW R²=0.04 (geographic extrapolation poor)
+- Leave-one-Land-out (strict): BSW R²=0.38 (base was 0.04)
 - Major parties: CDU 0.96, AfD 0.96, SPD 0.85, Die Linke 0.86
 - FDP also hard: R²=0.59
 - BSW biggest anomalies in Brandenburg and Sachsen-Anhalt
