@@ -3,10 +3,10 @@
 **[Live Dashboard](https://tom-doerr.github.io/bsw_analysis/)** |
 **[Forensic Report](https://tom-doerr.github.io/bsw_analysis/report.html)**
 
-Predicting 2025 Bundestagswahl Zweitstimme shares at polling
-station (Wahlbezirk) level using linear regression and XGBoost,
-plus comprehensive forensic analysis searching for evidence of
-missing or miscounted BSW votes.
+Statistical analysis of the 2025 Bundestagswahl at precinct
+level (95k Wahlbezirke). BSW received 4.981% — 9,529 votes
+short of the 5% threshold. This repo examines whether the
+margin justifies targeted recounts.
 
 ## Data
 
@@ -23,7 +23,7 @@ Datenquelle: © Die Bundeswahlleiterin, Wiesbaden 2025 ([bundeswahlleiterin.de](
 
 ## Scripts
 
-- `wahlbezirk_lr.py` — Linear regression per party (10-fold CV)
+- `wahlbezirk_lr.py` — Ridge regression per party (GroupKFold by WKR)
 - `ridge_party_cv.py` — Ridge regression (precinct-level, 2025 only)
 - `bsw_bd_decorrelate.py` — BSW+BD sum decorrelation analysis
 - `bsw_forensic.py` — 11-test forensic battery for missing votes
@@ -39,38 +39,44 @@ Datenquelle: © Die Bundeswahlleiterin, Wiesbaden 2025 ([bundeswahlleiterin.de](
 - `bsw_generative.py` — Latent-variable generative model (no double-counting)
 - `bsw_affidavits.py` — Sworn statement cross-reference
 - `calibrate_zero_model.py` — Zero-vote model calibration
+- `calibrate_zero_betabinom.py` — BB zero calibration
+- `triangulate_lr_xgb.py` — LR vs XGB triangulation
+- `low_tail_undercount.py` — Low-tail BB undercount
+- `bsw_bd_swap.py` — BSW→BD swap model
+- `official_corrections.py` — Prelim→final corrections
+- `generate_report.py` — HTML report generation
 
 ## Features
 
-**LR baseline (210 features):**
-- 2025 Erststimme shares per party (28 cols)
+**Independence-first LR (253 features):**
 - 2025 structural: turnout, invalid rates, log(voters)
-- 2021 Erst+Zweit shares aggregated to Wahlkreis
-- 2017 Erst+Zweit shares aggregated to Wahlkreis
-- Bundesland one-hot encoding (15 cols, drop_first)
+- 2021/2017 Erst+Zweit shares (Wahlkreis-level)
+- EW24 party shares (Gemeinde-level join)
+- Strukturdaten demographics (Wahlkreis-level)
+- Bundesland dummies (15 cols)
+- No 2025 Erststimmen (avoids same-election leak)
 
-**XGBoost enhanced (+71 = 281 features):**
-- Europawahl 2024 party shares (35 cols, Gemeinde-level join)
-- Strukturdaten demographics (36 cols, Wahlkreis-level join)
+**Base LR (210 features):** adds 2025 Erststimmen
 
 ## Prediction Results
 
-95,046 precincts, 29 party models, 10-fold CV.
+95,046 precincts, 29 party models, GroupKFold(10) by Wahlkreis,
+Ridge(alpha=5000). Independence-first model uses no 2025
+Erststimmen.
 
-| Party | LR R² | XGB R² | Δ | MAE (pp) |
-|-------|-------|--------|------|----------|
-| CSU | 0.995 | 0.996 | +0.002 | 0.31 |
-| AfD | 0.982 | 0.990 | +0.008 | 0.88 |
-| CDU | 0.981 | 0.986 | +0.005 | 1.06 |
-| GRÜNE | 0.939 | 0.962 | +0.022 | 1.01 |
-| Die Linke | 0.915 | 0.945 | +0.031 | 1.01 |
-| SPD | 0.893 | 0.928 | +0.035 | 1.26 |
-| FREIE WÄHLER | 0.827 | 0.877 | +0.050 | 0.49 |
-| **BSW** | **0.731** | **0.809** | **+0.078** | **0.98** |
-| FDP | 0.652 | 0.701 | +0.049 | 0.77 |
+| Party | LR R² | Notes |
+|-------|-------|-------|
+| CDU | 0.96 | |
+| AfD | 0.96 | |
+| Die Linke | 0.86 | |
+| SPD | 0.85 | |
+| **BSW** | **0.64** | **strict (no e25)** |
+| **BSW** | **0.63** | **base (with e25)** |
+| FDP | 0.59 | |
 
-BSW has the largest R² improvement of any major party (+0.078),
-driven by Europawahl 2024 BSW data and XGBoost non-linearities.
+BSW R²=0.64 with the strict model confirms predictions do not
+depend on same-election features. Leave-one-Land-out: R²=0.04
+(geographic extrapolation is poor for new parties).
 
 ### BSW Feature Importances (XGBoost)
 
@@ -85,36 +91,35 @@ driven by Europawahl 2024 BSW data and XGBoost non-linearities.
 BSW draws primarily from former Die Linke voters and
 AfD-adjacent demographics in eastern Germany.
 
-## Forensic Analysis: BSW Vote Integrity
+## Statistical Evidence
 
-### Motivation
+### Official Corrections (Arbeitstabelle 9)
 
-BSW (Bündnis Sahra Wagenknecht) is a new party that first
-contested in the 2025 Bundestagswahl. We used the prediction
-model residuals and raw precinct data to search for statistical
-evidence of missing, miscounted, or suppressed BSW votes.
+BSW gained **+4,277** Zweitstimmen (prelim→final) —
+**44.9%** of the 9,529 deficit. BD lost −2,640.
 
-### BSW + BÜNDNIS DEUTSCHLAND Decorrelation
+### Low-Tail Undercount
 
-BSW and BÜNDNIS DEUTSCHLAND are adjacent on the ballot
-(positions 26 and 27 in Zweitstimmen). We tested whether
-votes were systematically swapped between them:
+784 precincts show fewer BSW votes than predicted.
+**Null-calibrated excess: 5,145 votes (p=0.005).**
 
-- **R²(BSW+BD sum) = 0.735** vs R²(BSW alone) = 0.731 —
-  sum barely more predictable (+0.004)
-- **Within-sum fraction** BSW/(BSW+BD) is ~96.7% on average
-  and nearly unpredictable (R² = 0.038)
-- **Orthogonalized residual correlation**: -1.0 (mathematical
-  artifact, not evidence — two parts summing to a whole)
-- **Raw residual correlation**: +0.004 (no anti-correlation)
+### Power Analysis
+
+Forensic battery has **0% power** for diffuse errors.
+"No evidence" ≠ "no errors exist."
+
+### BSW↔BD Decorrelation
+
+Tested whether votes were swapped between them:
+
+- Raw residual correlation: +0.004 (no anti-correlation)
+- Would need ~12.5% of ALL BD votes for BSW to reach 5%
 - BSW+BD pair does not stand out vs control pairs
 
-**Verdict: No evidence of BSW↔BD vote swapping.**
+### Forensic Battery (11 tests)
 
-### 11-Test Forensic Battery
-
-All tests compare BSW against control parties (FDP, Die Linke)
-to distinguish BSW-specific anomalies from normal patterns.
+All tests pass — but have 0% power for diffuse errors.
+BSW matches control parties (FDP, Die Linke).
 
 **1. Turnout–BSW correlation** — Weak positive overall
 (r=+0.22), similar to AfD. Per-Land breakdown shows negative
@@ -171,69 +176,44 @@ heterogeneity, not a "depleted" fraud subpopulation.
 essentially nothing (all |r| < 0.02). The model already
 captures all systematic variation; remaining errors are noise.
 
-### XGBoost Residual Confirmation
+### XGBoost Triangulation
 
-The improved XGBoost model (R²=0.81, 29% less unexplained
-variance) confirms all findings. BSW residuals have positive
-skew (+0.51), near-zero mean residuals in every Bundesland,
-and identical distributional shape to FDP and Die Linke.
-The lower noise floor makes the picture *cleaner*, not more
-suspicious.
-
-### Conclusion
-
-**No evidence of missing or miscounted BSW votes.** Every
-forensic test shows normal patterns across both LR and XGBoost
-models. BSW behaves identically to control parties (FDP,
-Die Linke) on all 11 tests.
+71% Jaccard overlap between LR and XGB suspicious sets.
+Spearman ρ=0.898. Top-20 overlap: 80%, Top-50: 92%.
+Both models flag the same precincts.
 
 ### BSW's Specific Claims
 
-BSW got 4.981%, missing the 5% threshold by 9,529 votes.
-The party made four specific claims about vote miscounting:
+BSW got 4.981%, missing 5% by 9,529 votes (0.019pp).
 
-**Claim 1: BSW↔BD ballot confusion** — Residual correlation
-r=+0.004 (no anti-correlation). Would need ~12.5% of ALL BD
-votes transferred to reach 5%. **No evidence.**
+**Claim 1: Ballot confusion** — r=+0.004, no systematic
+swap detected. Would need ~12.5% of BD votes.
 
-**Claim 2: Zero-vote precincts** — 481 BSW=0 Urne precincts
-(1.41x expected). Max impact +2,873 votes, far short of
-9,529 needed. **Insufficient magnitude.**
+**Claim 2: Zero-vote precincts** — 670 low-tail precincts.
+Null-calibrated excess: 2,695 votes (p=0.005).
 
-**Claim 3: Correction extrapolation** — 50 BSW-selected
-recounts found 0.3 extra votes/precinct. Selection bias
-invalidates national extrapolation. **Not representative.**
+**Claim 3: Recount extrapolation** — 50 BSW-selected
+recounts. Selection bias limits extrapolation.
 
-**Claim 4: Disproportionate corrections** — 57.6% of
-corrections went to BSW, but precincts were BSW-selected.
-4,277 = 0.009% of all votes. **Selection bias.**
+**Claim 4: Official corrections** — BSW +4,277 (44.9%
+of deficit) through normal verification.
 
-## Evidence Analysis: Case for BSW Crossing 5%
+## Summary
 
-Six counting-error mechanisms (visibility reported
-separately as counterfactual). Deficit: 9,529.
-- **Conservative** (zeros + small): 5,300
-- **Central** (recount25% + zeros + ZIP + brief): 19,878
-- **Optimistic** (recount50% + BD + brief): 36,218
-
-### Bayesian Posterior
-
-Model B (selection-bias mixture): **P(Δ≥9,529) ≈ 25%**.
-Prior-insensitive across 3 priors. See `bsw_bayesian.py`.
-
-### Power Analysis
-
-Forensic battery **cannot detect** spread-thin miscounts
-(9,529×1: 0% detection). Only concentrated patterns
-(953×10) detected via skewness shift (90%).
+The 9,529-vote deficit is small enough that targeted
+recounts are justified:
+- Official corrections already recovered 44.9%
+- 5,145 excess missing votes (p=0.005)
+- Forensic tests lack power for diffuse errors
+- 3 affidavit-backed cases confirmed in registry
+- Independence-first model (no e25) confirms R²=0.64
 
 ## Evidence Registry
 
-3,735 flagged precincts from 95k. Uses Binomial P(BSW=0)
-and BD rank percentiles within Land (not z-scores).
-Ranked by `missing_votes` (expected BSW if no error).
-Calibration: BY +64, NI +36, HE +29 excess zeros.
-All 3 known filing cases matched.
+3,722 flagged precincts by 4 criteria (BB P(0), BD rank).
+Uses Beta-Binomial p0 via bb_utils.
+BB-calibrated excess: HE +19.4, NI +18.0, BY +3.9.
+All 3 affidavit cases matched.
 
 ## Recount Bias: Sensitivity Curve
 

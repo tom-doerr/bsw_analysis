@@ -1,80 +1,82 @@
 land,wahlkreis,gemeinde,bezirksart,valid_total,bsw_pred_pct,lambda_,p0_bb,expected_missing
-BY,248,"Rieneck, St",Brief,844,4.533,38.26,1.56e-07,38.3
-SH,7,"Wedel, Stadt",Urne,780,4.297,33.52,6.33e-07,33.5
-HH,23,"Hamburg, Freie und Hansestadt, Bezirk Bergedorf",Brief,612,4.803,29.4,7.80e-07,29.4
-HE,180,"Hochheim am Main, Stadt",Brief,619,4.594,28.44,1.34e-06,28.4
-NI,31,"Meppen, Stadt",Brief,759,3.412,25.9,1.44e-05,25.9
-HH,20,"Hamburg, Freie und Hansestadt, Bezirk Eimsbüttel",Urne,693,3.716,25.75,9.24e-06,25.7
-NW,127,"Tecklenburg, Stadt",Brief,735,3.425,25.17,1.66e-05,25.2
-SH,1,"Flensburg, Stadt",Urne,840,2.947,24.75,4.02e-05,24.8
-NI,43,"Neustadt am Rübenberge, Stadt",Urne,479,4.876,23.36,3.96e-06,23.4
-HH,22,"Hamburg, Freie und Hansestadt, Bezirk Wandsbek (Teil)",Urne,506,4.411,22.32,9.17e-06,22.3
-RP,198,"Lahnstein, Stadt",Brief,691,3.224,22.28,4.41e-05,22.3
-HE,180,"Eppstein, Stadt",Brief,471,4.604,21.69,8.98e-06,21.7
-BY,256,Durach,Urne,438,4.738,20.75,1.05e-05,20.8
-NI,45,Ilsede,Urne,498,4.134,20.59,2.12e-05,20.6
-NI,52,Katlenburg-Lindau,Urne,544,3.753,20.41,3.49e-05,20.4
-HH,23,"Hamburg, Freie und Hansestadt, Bezirk Harburg",Urne,411,4.95,20.35,9.83e-06,20.3
-BY,250,Veitshöchheim,Brief,823,2.427,19.97,2.64e-04,20.0
-BY,256,Durach,Brief,434,4.591,19.92,1.61e-05,19.9
-BY,245,Schwarzenbruck,Brief,482,3.804,18.33,6.08e-05,18.3
-HE,175,"Friedrichsdorf, Philipp-Reis-Stadt",Urne,504,3.427,17.27,1.28e-04,17.3
-NW,98,Reichshof,Urne,483,3.535,17.07,1.20e-04,17.1
-HE,166,Breuna,Urne,274,6.206,17.0,1.38e-05,17.0
-BW,259,"Stuttgart, Landeshauptstadt (Teil)",Brief,593,2.86,16.96,2.79e-04,17.0
-BW,281,Gottenheim,Urne,500,3.388,16.94,1.48e-04,16.9
-BY,214,Gröbenzell,Brief,678,2.422,16.42,5.86e-04,16.4
-BW,281,"Freiburg im Breisgau, Stadt",Brief,448,3.524,15.79,1.83e-04,15.8
-SH,10,Stapelfeld,Urne,431,3.598,15.51,1.86e-04,15.5
-BY,235,Frensdorf,Brief,428,3.602,15.42,1.91e-04,15.4
-HE,180,"Eschborn, Stadt",Urne,512,3.007,15.4,3.60e-04,15.4
-BY,251,Augsburg,Urne,733,2.099,15.38,1.22e-03,15.4
-BY,231,Poppenricht,Brief,592,2.585,15.3,6.21e-04,15.3
-NI,36,Tespe,Urne,372,3.841,14.29,2.29e-04,14.3
-BY,215,"Kösching, M",Brief,462,3.063,14.15,4.97e-04,14.2
-BY,247,"Oberelsbach, M",Urne,177,7.488,13.25,4.78e-05,13.3
-MV,16,Neetzow-Liepen,Urne,138,9.381,12.95,3.07e-05,12.9
-BY,247,Hausen,Urne,183,6.272,11.48,2.03e-04,11.5
-BY,227,"Rottenburg a.d.Laaber, St",Urne,270,4.242,11.45,5.41e-04,11.5
-BY,244,Nürnberg (Teil),Brief,382,2.915,11.13,1.58e-03,11.1
-BY,248,Mittelsinn,Brief,286,3.829,10.95,8.70e-04,11.0
-NW,148,Finnentrop,Urne,296,3.694,10.93,9.55e-04,10.9
-BY,255,"Fischach, M",Brief,445,2.398,10.67,2.99e-03,10.7
-SN,157,Reinhardtsdorf-Schöna,Brief,152,6.997,10.64,2.56e-04,10.6
-NI,53,Rhumspringe,Urne,481,2.201,10.58,3.76e-03,10.6
-BY,246,"Stockstadt a.Main, M",Brief,354,2.962,10.49,1.94e-03,10.5
-BY,246,"Schöllkrippen, M",Brief,354,2.937,10.4,2.04e-03,10.4
-BY,247,Untermerzbach,Urne,167,6.064,10.13,4.66e-04,10.1
-HH,21,"Hamburg, Freie und Hansestadt, Bezirk Wandsbek (Teil)",Urne,561,1.805,10.13,6.78e-03,10.1
-BY,247,"Maßbach, M",Urne,134,7.455,9.99,3.34e-04,10.0
-RP,210,Knöringen,Urne,211,4.658,9.83,9.47e-04,9.8
-BY,233,Gleißenberg,Brief,360,2.694,9.7,3.22e-03,9.7
-BY,241,Erlangen,Urne,528,1.789,9.45,8.37e-03,9.4
-BY,221,Raubling,Urne,326,2.893,9.43,3.07e-03,9.4
-BY,239,"Ebensfeld, M",Brief,400,2.338,9.35,4.93e-03,9.4
-BY,247,"Münnerstadt, St",Urne,113,8.165,9.23,4.64e-04,9.2
-BY,222,"Bad Tölz, St",Brief,379,2.404,9.11,5.07e-03,9.1
-BY,232,"Hemau, St",Urne,275,3.299,9.07,2.73e-03,9.1
-BW,295,"Bad Saulgau, Stadt",Urne,213,4.189,8.92,1.85e-03,8.9
-BY,233,Zandt,Brief,302,2.906,8.78,3.97e-03,8.8
-NI,49,Sickte,Urne,159,5.481,8.71,1.28e-03,8.7
-BY,247,"Münnerstadt, St",Urne,90,9.103,8.19,8.04e-04,8.2
-BY,250,Riedenheim,Urne,242,3.345,8.09,4.16e-03,8.1
-BY,214,Bergkirchen,Urne,256,3.034,7.77,5.71e-03,7.8
-HE,168,"Bebra, Stadt",Urne,148,5.242,7.76,2.41e-03,7.8
-RP,200,Sonnenberg-Winnenberg,Urne,191,3.953,7.55,4.17e-03,7.6
-BY,239,"Rattelsdorf, M",Urne,227,3.3,7.49,5.69e-03,7.5
-BY,233,"Cham, St",Urne,286,2.604,7.45,8.46e-03,7.4
-BY,247,"Mellrichstadt, St",Urne,153,4.857,7.43,3.28e-03,7.4
-BY,213,Münchsmünster,Brief,270,2.745,7.41,7.89e-03,7.4
-BY,233,"Wörth a.d.Donau, St",Urne,212,3.408,7.22,6.18e-03,7.2
-NW,98,"Bergneustadt, Stadt",Urne,225,3.207,7.22,6.80e-03,7.2
-BB,65,"Schönewalde, Stadt",Urne,63,11.141,7.02,1.52e-03,7.0
-BW,295,Ratshausen,Brief,145,4.797,6.96,4.43e-03,7.0
-HE,172,"Romrod, Stadt",Urne,146,4.662,6.81,5.04e-03,6.8
-HE,166,"Korbach, Hansestadt, Kreisstadt",Urne,135,4.946,6.68,5.06e-03,6.7
-BY,227,"Rottenburg a.d.Laaber, St",Urne,157,4.232,6.64,6.28e-03,6.6
-BY,253,"Pöttmes, M",Urne,193,3.316,6.4,9.84e-03,6.4
-BY,227,"Rottenburg a.d.Laaber, St",Urne,116,5.019,5.82,8.61e-03,5.8
-NI,49,Vahlberg,Urne,105,5.414,5.68,8.76e-03,5.7
-TH,193,"Weida, Stadt",Urne,75,7.22,5.42,8.22e-03,5.4
+SH,1,"Flensburg, Stadt",Urne,840,3.666,30.8,2.38e-06,30.8
+BY,248,"Rieneck, St",Brief,844,3.536,29.84,3.67e-06,29.8
+SH,7,"Wedel, Stadt",Urne,780,3.616,28.21,4.56e-06,28.2
+BY,241,Erlangen,Urne,528,5.273,27.84,4.73e-07,27.8
+BY,251,Augsburg,Urne,733,3.69,27.05,5.28e-06,27.0
+NI,31,"Meppen, Stadt",Brief,759,3.522,26.73,7.45e-06,26.7
+RP,198,"Lahnstein, Stadt",Brief,691,3.852,26.62,4.54e-06,26.6
+HE,180,"Hochheim am Main, Stadt",Brief,619,4.241,26.25,2.83e-06,26.3
+HH,20,"Hamburg, Freie und Hansestadt, Bezirk Eimsbüttel",Urne,693,3.725,25.82,6.71e-06,25.8
+HH,23,"Hamburg, Freie und Hansestadt, Bezirk Bergedorf",Brief,612,4.196,25.68,3.51e-06,25.7
+BW,259,"Stuttgart, Landeshauptstadt (Teil)",Brief,593,4.195,24.88,4.38e-06,24.9
+BY,214,Gröbenzell,Brief,678,3.514,23.83,1.51e-05,23.8
+NW,127,"Tecklenburg, Stadt",Brief,735,3.001,22.06,5.11e-05,22.1
+HE,175,"Friedrichsdorf, Philipp-Reis-Stadt",Urne,504,4.36,21.98,8.36e-06,22.0
+NI,52,Katlenburg-Lindau,Urne,544,3.983,21.67,1.44e-05,21.7
+BY,250,Veitshöchheim,Brief,823,2.627,21.62,1.05e-04,21.6
+HE,180,"Eschborn, Stadt",Urne,512,4.118,21.08,1.46e-05,21.1
+NI,43,"Neustadt am Rübenberge, Stadt",Urne,479,4.067,19.48,2.56e-05,19.5
+HH,22,"Hamburg, Freie und Hansestadt, Bezirk Wandsbek (Teil)",Urne,506,3.757,19.01,4.19e-05,19.0
+HH,21,"Hamburg, Freie und Hansestadt, Bezirk Wandsbek (Teil)",Urne,561,3.382,18.97,6.66e-05,19.0
+NW,98,Reichshof,Urne,483,3.708,17.91,6.26e-05,17.9
+HE,180,"Eppstein, Stadt",Brief,471,3.761,17.72,6.30e-05,17.7
+BY,256,Durach,Urne,438,3.955,17.32,5.87e-05,17.3
+HH,23,"Hamburg, Freie und Hansestadt, Bezirk Harburg",Urne,411,4.173,17.15,5.05e-05,17.2
+NI,45,Ilsede,Urne,498,3.425,17.06,1.12e-04,17.1
+BW,274,"Heidelberg, Stadt",Brief,506,3.282,16.61,1.52e-04,16.6
+BW,281,"Freiburg im Breisgau, Stadt",Brief,448,3.667,16.43,1.06e-04,16.4
+BW,281,Gottenheim,Urne,500,3.16,15.8,2.24e-04,15.8
+BY,256,Durach,Brief,434,3.518,15.27,1.83e-04,15.3
+BY,231,Poppenricht,Brief,592,2.562,15.17,5.58e-04,15.2
+SH,10,Stapelfeld,Urne,431,3.32,14.31,3.09e-04,14.3
+BY,255,"Fischach, M",Brief,445,3.115,13.86,4.41e-04,13.9
+BY,244,Nürnberg (Teil),Brief,382,3.597,13.74,2.94e-04,13.7
+BY,245,Schwarzenbruck,Brief,482,2.797,13.48,6.95e-04,13.5
+MV,16,Neetzow-Liepen,Urne,138,9.674,13.35,1.94e-05,13.3
+NI,53,Rhumspringe,Urne,481,2.705,13.01,8.92e-04,13.0
+BY,222,"Bad Tölz, St",Brief,379,3.414,12.94,4.64e-04,12.9
+SN,157,Reinhardtsdorf-Schöna,Brief,152,8.509,12.93,3.57e-05,12.9
+NW,148,Finnentrop,Urne,296,4.352,12.88,2.35e-04,12.9
+BY,215,"Kösching, M",Brief,462,2.771,12.8,8.91e-04,12.8
+NI,36,Tespe,Urne,372,3.339,12.42,6.01e-04,12.4
+BY,239,"Ebensfeld, M",Brief,400,3.05,12.2,8.37e-04,12.2
+HE,166,Breuna,Urne,274,4.397,12.05,3.32e-04,12.0
+BY,235,Frensdorf,Brief,428,2.811,12.03,1.11e-03,12.0
+BY,246,"Stockstadt a.Main, M",Brief,354,3.143,11.13,1.16e-03,11.1
+BY,247,"Oberelsbach, M",Urne,177,6.012,10.64,3.20e-04,10.6
+NI,49,Sickte,Urne,159,6.359,10.11,3.88e-04,10.1
+RP,210,Knöringen,Urne,211,4.526,9.55,1.05e-03,9.5
+BY,246,"Schöllkrippen, M",Brief,354,2.68,9.49,3.17e-03,9.5
+BW,295,"Bad Saulgau, Stadt",Urne,213,4.422,9.42,1.18e-03,9.4
+NW,98,"Bergneustadt, Stadt",Urne,225,4.158,9.35,1.37e-03,9.4
+BY,221,Raubling,Urne,326,2.843,9.27,3.06e-03,9.3
+BY,214,Bergkirchen,Urne,256,3.596,9.21,1.96e-03,9.2
+BY,248,Mittelsinn,Brief,286,3.076,8.8,3.20e-03,8.8
+BY,233,"Cham, St",Urne,286,3.048,8.72,3.38e-03,8.7
+SH,6,Schönkirchen,Urne,249,3.453,8.6,2.83e-03,8.6
+BY,230,"Regen, St",Urne,304,2.828,8.6,4.10e-03,8.6
+BY,239,"Rattelsdorf, M",Urne,227,3.736,8.48,2.60e-03,8.5
+BY,247,Hausen,Urne,183,4.628,8.47,1.81e-03,8.5
+NW,146,"Schmallenberg, Stadt",Urne,283,2.991,8.46,3.91e-03,8.5
+BY,227,"Rottenburg a.d.Laaber, St",Urne,270,3.081,8.32,3.96e-03,8.3
+BY,239,"Ebensfeld, M",Urne,251,3.259,8.18,3.83e-03,8.2
+BY,247,"Mellrichstadt, St",Urne,153,5.187,7.94,2.05e-03,7.9
+BY,233,Gleißenberg,Brief,360,2.185,7.87,8.77e-03,7.9
+TH,193,"Weida, Stadt",Urne,75,9.978,7.48,1.15e-03,7.5
+BY,232,"Hemau, St",Urne,275,2.704,7.44,7.38e-03,7.4
+BY,247,Untermerzbach,Urne,167,4.423,7.39,3.59e-03,7.4
+NI,34,Grasberg,Urne,218,3.381,7.37,5.38e-03,7.4
+BB,65,"Schönewalde, Stadt",Urne,63,11.65,7.34,1.07e-03,7.3
+HE,172,"Romrod, Stadt",Urne,146,4.888,7.14,3.64e-03,7.1
+HE,168,"Bebra, Stadt",Urne,148,4.787,7.08,3.86e-03,7.1
+BW,295,Ratshausen,Brief,145,4.803,6.96,4.14e-03,7.0
+BW,268,"Künzelsau, Stadt",Urne,182,3.793,6.9,5.86e-03,6.9
+BY,247,"Oberelsbach, M",Urne,147,4.416,6.49,6.15e-03,6.5
+RP,200,Sonnenberg-Winnenberg,Urne,191,3.385,6.46,8.68e-03,6.5
+BY,243,Nürnberg (Teil),Brief,160,4.041,6.46,6.95e-03,6.5
+NI,38,Bad Essen,Urne,200,3.192,6.38,9.77e-03,6.4
+RP,199,Wollmerath (einschl. Wagenhausen),Urne,105,5.626,5.91,6.92e-03,5.9
+BY,247,"Münnerstadt, St",Urne,90,6.545,5.89,6.06e-03,5.9
+RP,201,Niederstedem (einschl. Oberstedem),Urne,97,5.967,5.79,7.11e-03,5.8
+RP,196,Ziegenhain,Urne,75,7.429,5.57,6.88e-03,5.6

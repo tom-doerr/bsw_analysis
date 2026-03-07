@@ -564,7 +564,12 @@ def _save_csvs(res_df, preds, anom_df, meta, parties,
         pred_df[f"{party}_pred"] = p
         pred_df[f"{party}_resid"] = a - p
     if bsw_strict is not None:
-        pred_df["BSW_pred_strict"] = bsw_strict
+        pred_df.rename(columns={"BSW_pred": "BSW_pred_base",
+                                "BSW_resid": "BSW_resid_base"},
+                       inplace=True)
+        pred_df["BSW_pred"] = bsw_strict
+        pred_df["BSW_resid"] = (
+            pred_df["BSW_actual"] - bsw_strict)
     out2 = DATA / "wahlbezirk_lr_predictions.csv"
     pred_df.to_csv(out2, index=False)
     print(f"Wrote {out2}")

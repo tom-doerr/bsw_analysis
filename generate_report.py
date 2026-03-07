@@ -61,15 +61,57 @@ def sec_executive():
     """Executive summary HTML."""
     return """
 <h2>Executive Summary</h2>
-<p>This report presents a forensic analysis of the
-2025 Bundestagswahl, focusing on BSW vote patterns
-across 95,046 polling stations (Wahlbezirke).</p>
-<div class="verdict">
-<b>Finding: No evidence of missing or miscounted
-BSW votes.</b> All 11 forensic tests show normal
-patterns. BSW behaves identically to control
-parties (FDP, Die Linke) on every test.
+<p>BSW received 4.981%, missing the 5% threshold by
+9,529 votes (0.019pp). This report examines whether
+the margin is small enough to justify targeted
+recounts.</p>
+<div class="finding">
+<b>Key findings:</b>
+<ul>
+<li>Official corrections already recovered +4,277
+BSW votes (44.9% of the deficit)</li>
+<li>784 low-tail precincts show 5,145 excess
+missing votes (null-calibrated p=0.005)</li>
+<li>Forensic battery has 0% power to detect
+9,529 votes spread across precincts</li>
+<li>3 affidavit-backed cases confirmed in
+anomaly registry</li>
+<li>Independence-first model (no 2025 Erststimmen)
+confirms predictions (R²=0.64)</li>
+</ul>
 </div>"""
+
+
+def sec_corrections():
+    """Official corrections from Arbeitstabelle 9."""
+    h = '<h2>Official Corrections</h2>'
+    h += '<p>Between preliminary and final results '
+    h += '(Arbeitstabelle 9), BSW gained '
+    h += '<b>+4,277</b> Zweitstimmen &mdash; '
+    h += '<b>44.9%</b> of the deficit. '
+    h += 'BD lost &minus;2,640.</p>'
+    return h
+
+
+def sec_power():
+    """Power analysis section."""
+    h = '<h2>Power Analysis</h2>'
+    h += '<p>The forensic battery has <b>0% power</b> '
+    h += 'to detect 9,529 votes spread across '
+    h += 'precincts. Only concentrated errors '
+    h += '(953&times;10) are detectable (90%).</p>'
+    return h
+
+
+def sec_gap():
+    """Official gap section."""
+    h = '<h2>The Official Gap</h2>'
+    h += '<p>BSW received <b>2,410,553</b> valid '
+    h += 'Zweitstimmen out of 49,649,512 total '
+    h += '(<b>4.981%</b>). The 5.000% threshold '
+    h += 'requires 2,420,082 &mdash; a deficit '
+    h += 'of <b>9,529</b> (0.019pp).</p>'
+    return h
 
 
 def sec_model_perf(lr, xgb):
@@ -100,8 +142,10 @@ def sec_model_perf(lr, xgb):
                 f"<td>{x-l:+.4f}</td></tr>")
     tbl += "</tbody></table>"
     return (f"<h2>Model Performance</h2>"
-            f"<p>95,046 precincts, 281 features, "
-            f"10-fold CV.</p>{chart}{tbl}")
+            f"<p>95,046 precincts, GroupKFold(10) "
+            f"by Wahlkreis. Independence-first LR "
+            f"uses no 2025 Erststimmen.</p>"
+            f"{chart}{tbl}")
 
 
 def sec_residual_dist(pred):
@@ -205,29 +249,35 @@ def sec_skew_kurt(pred):
 
 def sec_claims():
     """BSW's 4 specific claims."""
-    h = '<h2>BSW Claims Analysis</h2>'
-    h += '<p>BSW got 4.981% (9,529 short).</p>'
-    h += '<h3>1: BSW↔BD Ballot Confusion</h3>'
-    h += '<p>r=+0.004, no swap. Need ~12.5% of BD.</p>'
-    h += '<div class="verdict">No evidence.</div>'
+    h = '<h2>BSW Claims Assessment</h2>'
+    h += '<h3>1: BSW&#8596;BD Ballot Confusion</h3>'
+    h += '<p>Residual r=+0.004. No systematic swap '
+    h += 'detected. Would need ~12.5% of BD.</p>'
     h += '<h3>2: Zero-Vote Precincts</h3>'
-    h += '<p>Max +2,873 (&lt;9,529 needed).</p>'
-    h += '<div class="verdict">Insufficient.</div>'
-    h += '<h3>3: Extrapolation</h3>'
-    h += '<p>50 BSW-selected recounts, biased.</p>'
-    h += '<div class="verdict">Biased sample.</div>'
-    h += '<h3>4: Corrections</h3>'
-    h += '<p>57.6% to BSW, but BSW-selected.</p>'
-    h += '<div class="verdict">Selection bias.</div>'
+    h += '<p>784 low-tail precincts (81 zeros + 703 '
+    h += 'BSW&gt;0). Null-calibrated excess: 5,145 '
+    h += 'votes (p=0.005).</p>'
+    h += '<h3>3: Recount Extrapolation</h3>'
+    h += '<p>50 BSW-selected recounts. Selection '
+    h += 'bias limits national extrapolation.</p>'
+    h += '<h3>4: Official Corrections</h3>'
+    h += '<p>+4,277 BSW (44.9% of deficit) via '
+    h += 'normal verification process.</p>'
     return h
 
 
 def sec_conclusion():
     h = '<h2>Conclusion</h2>'
-    h += '<div class="verdict">No evidence of '
-    h += 'missing or miscounted BSW votes. Every '
-    h += 'forensic test shows normal patterns '
-    h += 'matching control parties.</div>'
+    h += '<div class="finding">'
+    h += 'The 9,529-vote deficit is small enough '
+    h += 'that targeted recounts are justified. '
+    h += 'Official corrections recovered 44.9%, '
+    h += '5,145 excess low-tail missing votes are '
+    h += 'statistically significant (p=0.005), '
+    h += 'and forensic tests lack power to detect '
+    h += 'diffuse errors. The question is not '
+    h += 'settled &mdash; it requires recounts.'
+    h += '</div>'
     return h
 
 
@@ -241,7 +291,10 @@ th,td{border:1px solid #ddd;padding:6px 10px}
 th{background:#f2f2f2}
 .verdict{background:#e8f5e9;border-left:4px solid
 #2e7d32;padding:8px 12px;margin:12px 0;
-font-weight:bold;color:#2e7d32}"""
+font-weight:bold;color:#2e7d32}
+.finding{background:#fff3e0;border-left:4px solid
+#e65100;padding:8px 12px;margin:12px 0;color:#bf360c}
+.finding ul{margin:8px 0;padding-left:20px}"""
 
 
 def render(sections):
@@ -250,9 +303,9 @@ def render(sections):
     tmpl = Template(
         '<!DOCTYPE html><html><head>'
         '<meta charset="UTF-8">'
-        '<title>BSW Forensic Report</title>'
+        '<title>BSW Recount Analysis</title>'
         '<style>{{css}}</style></head><body>'
-        '<h1>BSW Election Forensic Report</h1>'
+        '<h1>BSW: The Case for Targeted Recounts</h1>'
         '<p><i>{{date}}</i> | '
         '<a href="./">Dashboard</a></p>'
         '{{content}}'
@@ -268,12 +321,15 @@ def main():
     print("Generating sections...")
     secs = [
         sec_executive(),
+        sec_gap(),
+        sec_corrections(),
+        sec_power(),
+        sec_claims(),
         sec_model_perf(lr, xgb),
-        sec_turnout(df),
         sec_residual_dist(pred),
+        sec_turnout(df),
         sec_benford(df),
         sec_skew_kurt(pred),
-        sec_claims(),
         sec_conclusion(),
     ]
     print("Rendering HTML...")

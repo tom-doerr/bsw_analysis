@@ -99,7 +99,7 @@ Repo: `~/git/bsw_analysis` (github.com/tom-doerr/bsw_analysis)
 - Power: forensic battery cannot detect 9,529×1 miscount (0%)
 
 ## Evidence Registry
-- 3,722 flagged precincts by 4 criteria (BB P(0), BD rank pctile)
+- 3,578 flagged precincts by 4 criteria (BB P(0), BD rank pctile)
 - Now uses Beta-Binomial p0 via bb_utils
 - Stores log10_p0_bb for ranking (no rounding loss)
 - BB-calibrated excess: HE +19.4, NI +18.0, BY +3.9
@@ -136,20 +136,20 @@ Repo: `~/git/bsw_analysis` (github.com/tom-doerr/bsw_analysis)
 
 ## LR vs XGB Triangulation
 - Uses estimated ρ from bb_utils (not hardcoded)
-- 71% Jaccard overlap of suspicious precincts
-- Spearman ρ=0.898, Top-20: 80%, Top-50: 92%
+- 68% Jaccard overlap of suspicious precincts
+- Spearman ρ=0.878, Top-20: 70%, Top-50: 94%
 
-## Pipeline Consistency (v5)
-- All scripts use bb_utils.estimate_rho + bb_p0
+## Pipeline Consistency (v6)
+- BSW_pred = strict model (no e25), BSW_pred_base = old
+- All 22 downstream scripts use BSW_pred (now strict)
 - GroupKFold(10) by Wahlkreis (honest geographic CV)
 - Ridge(alpha=5000) instead of LinearRegression
-- Strict model: no e25_*, +EW24+Strukturdaten (R²=0.64)
-- Shared module: bb_utils.py
+- bb_utils.estimate_rho + bb_p0 (shared module)
 - Makefile: `make all` (full), `make clean` (reset)
 
 ## Top BB Anomalies Case File
-- 74 BB-suspicious BSW=0 precincts
-- Total expected missing: 995 votes
+- 81 BB-suspicious BSW=0 precincts
+- Total expected missing: 1,132 votes
 - Concentrated in λ=10-50 range
 - Output: data/top_anomalies_bb.csv
 
@@ -192,11 +192,10 @@ Repo: `~/git/bsw_analysis` (github.com/tom-doerr/bsw_analysis)
 
 ## Low-Tail Undercount Analysis
 - P(BSW≤obs) under BB for ALL precincts, not just BSW=0
-- **670 low-tail precincts** (74 zeros + 596 BSW>0)
-- Total expected missing: 14,547
-- **Null-calibrated excess: 2,695 votes (p=0.005)**
-- Count not significant (p=0.21), missing votes IS significant
-- λ 20-50 bin: 289 precincts, 6,069 missing
+- **784 low-tail precincts** with strict model
+- Total expected missing: 18,586
+- **Null-calibrated excess: 5,145 votes (p=0.005)**
+- BSW_pred now uses strict (independence-first) model
 
 ## BSW→BD Swap Model
 - Compares BD rate in adjacent vs SL (non-adjacent) states
