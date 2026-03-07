@@ -210,7 +210,7 @@ recounts are justified:
 
 ## Evidence Registry
 
-3,722 flagged precincts by 4 criteria (BB P(0), BD rank).
+3,578 flagged precincts by 4 criteria (BB P(0), BD rank).
 Uses Beta-Binomial p0 via bb_utils.
 BB-calibrated excess: HE +19.4, NI +18.0, BY +3.9.
 All 3 affidavit cases matched.
@@ -243,7 +243,7 @@ python3 xgb_enhanced.py         # XGBoost + EW24 + Strukturdaten
 python3 bsw_bd_decorrelate.py   # decorrelation analysis
 python3 bsw_forensic.py         # forensic battery
 python3 bsw_claims_test.py      # BSW's specific claims
-python3 bsw_evidence.py         # evidence for crossing 5%
+python3 bsw_evidence.py         # scenario analysis
 python3 bsw_bayesian.py         # Bayesian posterior
 python3 bsw_power.py            # power analysis
 python3 panel_analysis.py       # Gemeinde panel analysis

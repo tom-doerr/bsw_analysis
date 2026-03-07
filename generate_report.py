@@ -106,10 +106,10 @@ def sec_power():
 def sec_gap():
     """Official gap section."""
     h = '<h2>The Official Gap</h2>'
-    h += '<p>BSW received <b>2,410,553</b> valid '
+    h += '<p>BSW received <b>2,472,947</b> valid '
     h += 'Zweitstimmen out of 49,649,512 total '
     h += '(<b>4.981%</b>). The 5.000% threshold '
-    h += 'requires 2,420,082 &mdash; a deficit '
+    h += 'requires 2,482,476 &mdash; a deficit '
     h += 'of <b>9,529</b> (0.019pp).</p>'
     return h
 

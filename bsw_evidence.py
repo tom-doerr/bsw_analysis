@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
-"""Build the strongest statistical case that BSW was
-systematically undercounted in the 2025 Bundestagswahl.
-BSW got 4.981%, missing 5% by 9,529 votes."""
+"""Scenario analysis for BSW crossing 5% in the
+2025 Bundestagswahl. BSW got 4.981%, missing 5%
+by 9,529 votes."""
 
 import numpy as np
 import pandas as pd

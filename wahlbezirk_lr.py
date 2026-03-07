@@ -441,11 +441,15 @@ def main():
     print(f"Strict model (no e25): {Xs.shape[1]} features")
     print(f"{'='*70}")
     bsw_strict = train_party(Xs, z_map["BSW"], cv, groups=wkr)
-    r2s = r2_score(z_map["BSW"], bsw_strict)
-    print(f"  BSW strict R²={r2s:.4f}")
+    bsw_strict_metrics = compute_metrics(
+        z_map["BSW"], bsw_strict)
+    print(f"  BSW strict R²={bsw_strict_metrics['R2']:.4f}")
 
     # === Leave-one-Land-out (strict model) ===
     _lolo_check(Xs, z_map, land)
+
+    # Overwrite BSW metrics with strict model
+    res_df.loc["BSW"] = bsw_strict_metrics
 
     # === Save CSVs ===
     _save_csvs(res_df, preds, anom_df, meta, parties,

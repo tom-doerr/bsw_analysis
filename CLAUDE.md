@@ -15,7 +15,7 @@ Repo: `~/git/bsw_analysis` (github.com/tom-doerr/bsw_analysis)
 - `aggregate_swing_wkr.py` — Aggregate swing to Wahlkreis
 - `prep_dashboard.py` — Build JSON for Three.js dashboard
 - `generate_report.py` — HTML report with Plotly charts
-- `bsw_evidence.py` — 7-analysis case for BSW crossing 5%
+- `bsw_evidence.py` — Scenario analysis for BSW crossing 5%
 - `bsw_bayesian.py` — Bayesian posterior P(Δ≥9,529)
 - `bsw_power.py` — Power analysis for forensic battery
 - `panel_analysis.py` — 4-election Gemeinde panel
