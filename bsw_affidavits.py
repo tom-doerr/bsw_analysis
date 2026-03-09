@@ -5,8 +5,8 @@ registry and statistical model predictions."""
 import numpy as np
 import pandas as pd
 from pathlib import Path
-from scipy.stats import poisson
 
+from bb_utils import bb_p0
 from wahlbezirk_lr import (load_2025_wbz, LAND_CODE,
                             validate_totals)
 
@@ -93,7 +93,7 @@ def match_to_precincts(cases, df, pred):
                pd.Series([""]*len(df)))
     bp=pred["BSW_pred"].values/100
     lam=np.maximum(bp*g, 1e-6)
-    p0=np.exp(-lam)
+    p0=bb_p0(lam)
     matched = []
     for c in cases:
         r = _match_one(c, df, bsw, bd, wkr,
@@ -129,20 +129,26 @@ def registry_overlap(matched):
     print(SEP)
     reg_path = DATA / "evidence_registry.csv"
     if not reg_path.exists():
-        print("  No registry found — run"
+        print("  No registry — run"
               " evidence_registry.py first")
+        matched["in_registry"] = False
+        matched["registry_flags"] = ""
         return
     reg = pd.read_csv(reg_path)
+    ir, fl = [], []
     for _, r in matched.iterrows():
-        m = (reg["wahlkreis"]==r.wkr) & \
-            (reg["bsw_votes"]==0) & \
-            (reg["bd_votes"]==r.bd)
+        m = ((reg["wahlkreis"]==r.wkr) &
+             (reg["bsw_votes"]==0) &
+             (reg["bd_votes"]==r.bd))
         if m.any():
-            flags = reg.loc[m.idxmax(), "flags"]
-            print(f"  #{r.id}: FOUND in registry"
-                  f" flags={flags}")
+            f = reg.loc[m.idxmax(), "flags"]
+            ir.append(True); fl.append(f)
+            print(f"  #{r.id}: FOUND flags={f}")
         else:
+            ir.append(False); fl.append("")
             print(f"  #{r.id}: NOT in registry")
+    matched["in_registry"] = ir
+    matched["registry_flags"] = fl
 
 
 def population_compare(matched, df, pred):

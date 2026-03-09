@@ -105,7 +105,10 @@ BSW gained **+4,277** Zweitstimmen (prelim→final) —
 
 ### Power Analysis
 
-Forensic battery has **0% power** for diffuse errors.
+4 powered forensic tests (skew, Benford, geographic,
+negative-residual fraction) have **0% power** for diffuse
+9,529×1 miscount. Even concentrated 953×10 patterns are
+only 15% detectable (skew test alone).
 "No evidence" ≠ "no errors exist."
 
 ### BSW↔BD Decorrelation
@@ -207,8 +210,8 @@ The 9,529-vote deficit is small enough that targeted
 recounts are justified:
 - Official corrections already recovered 44.9%
 - 5,145 excess missing votes (p=0.005)
-- Forensic tests lack power for diffuse errors
-- 3 affidavit-backed cases confirmed in registry
+- 4 powered forensic tests lack power for diffuse errors
+- 3 of 8 affidavit cases matched to anomaly registry
 - Strict BSW model (no e25) confirms R²=0.64
 
 ## Evidence Registry

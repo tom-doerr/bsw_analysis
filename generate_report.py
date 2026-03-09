@@ -30,6 +30,7 @@ def load_key_stats():
     s["bsw_pct"] = float(bsw["pct"])
     s["bsw_delta"] = int(bsw["delta"])
     s["bd_delta"] = int(bd["delta"])
+    s["bd_final"] = int(bd["final"])
     totals = pd.read_csv(
         DATA / "election_totals.csv", index_col=0)
     total = int(totals.loc["valid_total", "value"])
@@ -123,11 +124,11 @@ f'({s["recovery_pct"]:.1f}% of deficit)</li>'
 f'<li>{s["lt_n"]:,} low-tail precincts show '
 f'{s["lt_excess"]:,.0f} excess missing votes '
 f'(p={s["lt_p"]:.3f})</li>'
-f'<li>Forensic battery has 0% power to detect '
-f'{s["deficit"]:,} votes spread across '
-f'precincts</li>'
-f'<li>{s["n_affidavits"]} affidavit-backed cases '
-f'confirmed in anomaly registry</li>'
+f'<li>4 powered forensic tests have 0% power '
+f'to detect {s["deficit"]:,} votes spread '
+f'across precincts</li>'
+f'<li>{s["n_affidavits"]} of 8 affidavit cases '
+f'matched to anomaly registry</li>'
 f'<li>Strict BSW model (no 2025 Erststimmen) '
 f'confirms predictions '
 f'(R\u00b2={s["bsw_r2"]:.2f})</li>'
@@ -147,15 +148,33 @@ def sec_corrections(s):
 
 
 def sec_power(s):
-    """Power analysis section."""
-    conc = s["deficit"] // 10
+    """Power analysis, read from power_analysis.csv."""
+    pw = pd.read_csv(DATA / "power_analysis.csv")
+    d = s["deficit"]
+    scen = pw["scenario"].unique()
+    diffuse = scen[0] if len(scen) else f"{d}x1"
+    max_diff = pw[pw["scenario"]==diffuse][
+        "rate"].max()
+    conc_scen = scen[2] if len(scen) > 2 else ""
+    conc = pw[pw["scenario"] == conc_scen]
+    mc = conc["rate"].max() if len(conc) else 0
+    bt = (conc.loc[conc["rate"].idxmax(), "test"]
+          if mc > 0 else "none")
+    nt = pw["test"].nunique()
+    return _power_html(s, nt, max_diff,
+                       conc_scen, mc, bt)
+
+
+def _power_html(s, nt, max_diff, cl, mc, bt):
     return (
         '<h2>Power Analysis</h2>'
-        '<p>The forensic battery has <b>0% power</b> '
-        f'to detect {s["deficit"]:,} votes spread '
-        f'across precincts. Only concentrated errors '
-        f'({conc}&times;10) are detectable '
-        f'(90%).</p>')
+        f'<p>{nt} forensic tests (skew, Benford, '
+        f'geographic, negative-residual fraction) '
+        f'have <b>{max_diff:.0%} power</b> to detect '
+        f'{s["deficit"]:,} votes spread across '
+        f'precincts. Even concentrated {cl} patterns '
+        f'are only {mc:.0%} detectable '
+        f'({bt} test alone).</p>')
 
 
 def sec_gap(s):
@@ -314,13 +333,28 @@ def sec_skew_kurt(pred):
     return tbl
 
 
-def sec_claims(s):
+def _swap_corr(pred):
+    """Compute BSW↔BD residual correlation."""
+    b = pred["BSW_resid"].dropna()
+    bd_col = [c for c in pred.columns
+              if "DEUTSCHLAND" in c and "resid" in c]
+    if not bd_col:
+        return 0.0
+    d = pred[bd_col[0]].dropna()
+    idx = b.index.intersection(d.index)
+    return b.loc[idx].corr(d.loc[idx])
+
+
+def sec_claims(s, pred):
     """BSW's 4 specific claims."""
     nz = s["lt_n"] - s["zero_flags"]
+    swap_r = _swap_corr(pred)
+    bd_pct = s["deficit"] / s["bd_final"] * 100
     h = '<h2>BSW Claims Assessment</h2>'
     h += '<h3>1: BSW&#8596;BD Ballot Confusion</h3>'
-    h += '<p>Residual r=+0.004. No systematic swap '
-    h += 'detected. Would need ~12.5% of BD.</p>'
+    h += (f'<p>Residual r={swap_r:+.3f}. No swap '
+          f'detected. Would need ~{bd_pct:.1f}% '
+          f'of BD.</p>')
     h += '<h3>2: Zero-Vote Precincts</h3>'
     h += (f'<p>{s["lt_n"]:,} low-tail precincts '
           f'({s["zero_flags"]} zeros + {nz} '
@@ -398,7 +432,7 @@ def main():
         sec_gap(s),
         sec_corrections(s),
         sec_power(s),
-        sec_claims(s),
+        sec_claims(s, pred),
         sec_model_perf(lr, xgb),
         sec_residual_dist(pred),
         sec_turnout(df),

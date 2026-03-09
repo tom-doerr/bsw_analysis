@@ -139,17 +139,20 @@ Repo: `~/git/bsw_analysis` (github.com/tom-doerr/bsw_analysis)
 - 68% Jaccard overlap of suspicious precincts
 - Spearman ρ=0.878, Top-20: 70%, Top-50: 94%
 
-## Pipeline Consistency (v8)
+## Pipeline Consistency (v9)
 - BSW_pred = strict model (no e25), BSW_pred_base = old
 - All 22 downstream scripts use BSW_pred (now strict)
-- LR table is hybrid: BSW strict, other parties base (labeled)
-- generate_report.py: ALL headline numbers from data files
-  - official_corrections.csv, low_tail_calibration.csv,
-    null_calibration.csv, affidavit_analysis.csv,
-    election_totals.csv, wahlbezirk_lr_metrics.csv
+- LR table is hybrid: BSW strict, other parties base
+- generate_report.py: ALL numbers from data files
+  - Power: reads power_analysis.csv (was stale 90%→actual 15%)
+  - Swap: computes r from predictions CSV (was stale +0.004)
+  - BD%: derived from official_corrections.csv
   - Skew/kurtosis/Benford computed dynamically
-- README defers to report for exact forensic numbers
-- tests/test_report_consistency.py: 7 regression tests
+- bsw_affidavits.py: BB p0 via bb_utils (was Poisson)
+- bsw_affidavits.py: persists in_registry, registry_flags
+- tests: 9 report + 2 README consistency tests (24 total)
+- "4 powered forensic tests" not "forensic battery"
+- "3 of 8 affidavit cases" not "3 confirmed"
 - GroupKFold(10) by Wahlkreis (honest geographic CV)
 - Ridge(alpha=5000) instead of LinearRegression
 - bb_utils.estimate_rho + bb_p0 (shared module)
