@@ -102,7 +102,7 @@ Repo: `~/git/bsw_analysis` (github.com/tom-doerr/bsw_analysis)
 - 3,578 flagged precincts by 4 criteria (BB P(0), BD rank pctile)
 - Now uses Beta-Binomial p0 via bb_utils
 - Stores log10_p0_bb for ranking (no rounding loss)
-- BB-calibrated excess: HE +19.4, NI +18.0, BY +3.9
+- BB-calibrated excess: HE +20.6, NI +28.7, BY +52.1
 - Output: data/evidence_registry.csv + .json
 
 ## Recount Bias Analysis
@@ -120,13 +120,13 @@ Repo: `~/git/bsw_analysis` (github.com/tom-doerr/bsw_analysis)
 
 ## Generative Model
 - Swap+zeroout channels, no double-counting
-- Conservative: med=1,832, P=0%
-- Bias-adjusted Beta(1,9): med=7,175, P=34%
+- Conservative: med=3,089, P=0%
+- Bias-adjusted Beta(1,9): med=8,385, P=41%
 - π sweep: P(≥9529) crosses 50% at π≈20%
 
 ## Zero Calibration
 - Excess zeros in λ=10-50 range (survive BB calibration)
-- BB-adjusted: HE +19.4, NI +18.0, BY +3.9
+- BB-adjusted: HE +20.6, NI +28.7, BY +52.1
 
 ## Beta-Binomial Zero Calibration (v2)
 - ρ=0.002712 (2x overdispersion vs Binomial)
@@ -139,12 +139,17 @@ Repo: `~/git/bsw_analysis` (github.com/tom-doerr/bsw_analysis)
 - 68% Jaccard overlap of suspicious precincts
 - Spearman ρ=0.878, Top-20: 70%, Top-50: 94%
 
-## Pipeline Consistency (v7)
+## Pipeline Consistency (v8)
 - BSW_pred = strict model (no e25), BSW_pred_base = old
 - All 22 downstream scripts use BSW_pred (now strict)
-- LR table is hybrid: BSW strict, other parties base (labeled accordingly)
-- Report reads computed skew/kurtosis/Benford dynamically (no hardcoded stats)
-- README defers to report for exact forensic numbers (no drift)
+- LR table is hybrid: BSW strict, other parties base (labeled)
+- generate_report.py: ALL headline numbers from data files
+  - official_corrections.csv, low_tail_calibration.csv,
+    null_calibration.csv, affidavit_analysis.csv,
+    election_totals.csv, wahlbezirk_lr_metrics.csv
+  - Skew/kurtosis/Benford computed dynamically
+- README defers to report for exact forensic numbers
+- tests/test_report_consistency.py: 7 regression tests
 - GroupKFold(10) by Wahlkreis (honest geographic CV)
 - Ridge(alpha=5000) instead of LinearRegression
 - bb_utils.estimate_rho + bb_p0 (shared module)

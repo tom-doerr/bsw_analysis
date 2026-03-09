@@ -118,8 +118,10 @@ Tested whether votes were swapped between them:
 
 ### Forensic Battery (11 tests)
 
-All tests pass — but have 0% power for diffuse errors.
-BSW matches control parties (FDP, Die Linke).
+10 of 11 tests show no BSW-specific anomaly; Benford 2nd
+digit is marginal (see report for values). All have 0%
+power for diffuse errors. BSW matches controls (FDP, Die
+Linke) on every test.
 
 **1. Turnout–BSW correlation** — Weak positive overall
 (r=+0.22), similar to AfD. Per-Land breakdown shows negative
@@ -153,8 +155,8 @@ peak at -0.21. FDP and Die Linke also unimodal. No hidden
 
 **7. Kurtosis & skewness** — BSW has slightly positive right
 tail skew. Missing votes would produce *negative* skew (left
-tail). Near-normal kurtosis. Completely normal distribution
-shape. (See report for current computed values.)
+tail). Leptokurtic (heavier tails than normal). Not consistent
+with systematic undercounting. (See report for computed values.)
 
 **8. Geographic clustering** — Only 5/299 Wahlkreise have
 BSW mean residual z < -2. In those 5, FDP residuals are
@@ -179,8 +181,8 @@ captures all systematic variation; remaining errors are noise.
 
 ### XGBoost Triangulation
 
-71% Jaccard overlap between LR and XGB suspicious sets.
-Spearman ρ=0.898. Top-20 overlap: 80%, Top-50: 92%.
+68% Jaccard overlap between LR and XGB suspicious sets.
+Spearman ρ=0.878. Top-20 overlap: 70%, Top-50: 94%.
 Both models flag the same precincts.
 
 ### BSW's Specific Claims
@@ -213,7 +215,7 @@ recounts are justified:
 
 3,578 flagged precincts by 4 criteria (BB P(0), BD rank).
 Uses Beta-Binomial p0 via bb_utils.
-BB-calibrated excess: HE +19.4, NI +18.0, BY +3.9.
+BB-calibrated excess: HE +20.6, NI +28.7, BY +52.1.
 All 3 affidavit cases matched.
 
 ## Recount Bias: Sensitivity Curve
@@ -231,8 +233,8 @@ BSW=0 concentrates in small precincts (471/517 in Q0).
 
 ## Generative Model (speculative)
 
-Swap + zero-out channels. Conservative: med=1,832, P=0%.
-Bias-adjusted Beta(1,9): med=7,175, P=34%.
+Swap + zero-out channels. Conservative: med=3,089, P=0%.
+Bias-adjusted Beta(1,9): med=8,385, P=41%.
 Results are highly sensitive to π prior — treat as
 scenario exploration, not proof.
 

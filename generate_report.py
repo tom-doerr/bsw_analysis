@@ -2,6 +2,7 @@
 """Generate formal HTML report for BSW analysis."""
 
 import json
+import math
 import numpy as np
 import pandas as pd
 import plotly.graph_objects as go
@@ -17,6 +18,50 @@ PARTIES = ["BSW", "AfD", "CDU", "SPD", "GRÜNE",
 CONTROLS = ["FDP", "Die Linke"]
 PLOTLY_CFG = dict(include_plotlyjs="cdn",
                   full_html=False)
+
+
+def load_key_stats():
+    """Load headline numbers from data files."""
+    s = {}
+    oc = pd.read_csv(DATA / "official_corrections.csv")
+    bsw = oc[oc["party"] == "BSW"].iloc[0]
+    bd = oc[oc["party"] == "BD"].iloc[0]
+    s["bsw_final"] = int(bsw["final"])
+    s["bsw_pct"] = float(bsw["pct"])
+    s["bsw_delta"] = int(bsw["delta"])
+    s["bd_delta"] = int(bd["delta"])
+    totals = pd.read_csv(
+        DATA / "election_totals.csv", index_col=0)
+    total = int(totals.loc["valid_total", "value"])
+    s["valid_total"] = total
+    threshold = math.ceil(total * 0.05)
+    s["threshold"] = threshold
+    s["deficit"] = threshold - s["bsw_final"]
+    s["deficit_pp"] = s["deficit"] / total * 100
+    s["recovery_pct"] = (
+        s["bsw_delta"] / s["deficit"] * 100)
+    _load_secondary(s)
+    return s
+
+
+def _load_secondary(s):
+    lt = pd.read_csv(
+        DATA / "low_tail_calibration.csv",
+        index_col=0)
+    s["lt_n"] = int(lt.loc["n_obs", "v"])
+    s["lt_excess"] = lt.loc["excess_miss", "v"]
+    s["lt_p"] = lt.loc["n_p", "v"]
+    nc = pd.read_csv(
+        DATA / "null_calibration.csv", index_col=0)
+    s["zero_flags"] = int(
+        nc.loc["flags_obs", "value"])
+    aff = pd.read_csv(
+        DATA / "affidavit_analysis.csv")
+    s["n_affidavits"] = len(aff)
+    lr = pd.read_csv(
+        DATA / "wahlbezirk_lr_metrics.csv",
+        index_col=0)
+    s["bsw_r2"] = lr.loc["BSW", "R2"]
 
 
 def load_data():
@@ -57,61 +102,74 @@ def _share(df, party):
     return np.where(g > 0, v / g * 100, 0)
 
 
-def sec_executive():
+def sec_executive(s):
     """Executive summary HTML."""
-    return """
-<h2>Executive Summary</h2>
-<p>BSW received 4.981%, missing the 5% threshold by
-9,529 votes (0.019pp). This report examines whether
-the margin is small enough to justify targeted
-recounts.</p>
-<div class="finding">
-<b>Key findings:</b>
-<ul>
-<li>Official corrections already recovered +4,277
-BSW votes (44.9% of the deficit)</li>
-<li>784 low-tail precincts show 5,145 excess
-missing votes (null-calibrated p=0.005)</li>
-<li>Forensic battery has 0% power to detect
-9,529 votes spread across precincts</li>
-<li>3 affidavit-backed cases confirmed in
-anomaly registry</li>
-<li>Strict BSW model (no 2025 Erststimmen)
-confirms predictions (R²=0.64)</li>
-</ul>
-</div>"""
+    return (
+'<h2>Executive Summary</h2>'
+f'<p>BSW received {s["bsw_pct"]:.3f}%, missing the '
+f'5% threshold by {s["deficit"]:,} votes '
+f'({s["deficit_pp"]:.3f}pp). This report examines '
+f'whether the margin is small enough to justify '
+f'targeted recounts.</p>'
+    ) + _exec_findings(s)
 
 
-def sec_corrections():
+def _exec_findings(s):
+    return (
+f'<div class="finding"><b>Key findings:</b><ul>'
+f'<li>Official corrections recovered '
+f'+{s["bsw_delta"]:,} BSW votes '
+f'({s["recovery_pct"]:.1f}% of deficit)</li>'
+f'<li>{s["lt_n"]:,} low-tail precincts show '
+f'{s["lt_excess"]:,.0f} excess missing votes '
+f'(p={s["lt_p"]:.3f})</li>'
+f'<li>Forensic battery has 0% power to detect '
+f'{s["deficit"]:,} votes spread across '
+f'precincts</li>'
+f'<li>{s["n_affidavits"]} affidavit-backed cases '
+f'confirmed in anomaly registry</li>'
+f'<li>Strict BSW model (no 2025 Erststimmen) '
+f'confirms predictions '
+f'(R\u00b2={s["bsw_r2"]:.2f})</li>'
+f'</ul></div>')
+
+
+def sec_corrections(s):
     """Official corrections from Arbeitstabelle 9."""
-    h = '<h2>Official Corrections</h2>'
-    h += '<p>Between preliminary and final results '
-    h += '(Arbeitstabelle 9), BSW gained '
-    h += '<b>+4,277</b> Zweitstimmen &mdash; '
-    h += '<b>44.9%</b> of the deficit. '
-    h += 'BD lost &minus;2,640.</p>'
-    return h
+    return (
+        '<h2>Official Corrections</h2>'
+        '<p>Between preliminary and final results '
+        '(Arbeitstabelle 9), BSW gained '
+        f'<b>+{s["bsw_delta"]:,}</b> Zweitstimmen '
+        f'&mdash; <b>{s["recovery_pct"]:.1f}%</b> '
+        f'of the deficit. BD lost '
+        f'&minus;{abs(s["bd_delta"]):,}.</p>')
 
 
-def sec_power():
+def sec_power(s):
     """Power analysis section."""
-    h = '<h2>Power Analysis</h2>'
-    h += '<p>The forensic battery has <b>0% power</b> '
-    h += 'to detect 9,529 votes spread across '
-    h += 'precincts. Only concentrated errors '
-    h += '(953&times;10) are detectable (90%).</p>'
-    return h
+    conc = s["deficit"] // 10
+    return (
+        '<h2>Power Analysis</h2>'
+        '<p>The forensic battery has <b>0% power</b> '
+        f'to detect {s["deficit"]:,} votes spread '
+        f'across precincts. Only concentrated errors '
+        f'({conc}&times;10) are detectable '
+        f'(90%).</p>')
 
 
-def sec_gap():
+def sec_gap(s):
     """Official gap section."""
-    h = '<h2>The Official Gap</h2>'
-    h += '<p>BSW received <b>2,472,947</b> valid '
-    h += 'Zweitstimmen out of 49,649,512 total '
-    h += '(<b>4.981%</b>). The 5.000% threshold '
-    h += 'requires 2,482,476 &mdash; a deficit '
-    h += 'of <b>9,529</b> (0.019pp).</p>'
-    return h
+    return (
+        '<h2>The Official Gap</h2>'
+        f'<p>BSW received <b>{s["bsw_final"]:,}</b> '
+        f'valid Zweitstimmen out of '
+        f'{s["valid_total"]:,} total '
+        f'(<b>{s["bsw_pct"]:.3f}%</b>). The 5.000% '
+        f'threshold requires {s["threshold"]:,} '
+        f'&mdash; a deficit of '
+        f'<b>{s["deficit"]:,}</b> '
+        f'({s["deficit_pp"]:.3f}pp).</p>')
 
 
 def sec_model_perf(lr, xgb):
@@ -252,40 +310,46 @@ def sec_skew_kurt(pred):
                 f"(positive right tail). "
                 f"Missing votes would produce negative "
                 f"skew. Kurtosis {k_bsw:.1f} "
-                f"(near-normal).</p>")
+                f"(leptokurtic; normal=3.0).</p>")
     return tbl
 
 
-def sec_claims():
+def sec_claims(s):
     """BSW's 4 specific claims."""
+    nz = s["lt_n"] - s["zero_flags"]
     h = '<h2>BSW Claims Assessment</h2>'
     h += '<h3>1: BSW&#8596;BD Ballot Confusion</h3>'
     h += '<p>Residual r=+0.004. No systematic swap '
     h += 'detected. Would need ~12.5% of BD.</p>'
     h += '<h3>2: Zero-Vote Precincts</h3>'
-    h += '<p>784 low-tail precincts (81 zeros + 703 '
-    h += 'BSW&gt;0). Null-calibrated excess: 5,145 '
-    h += 'votes (p=0.005).</p>'
+    h += (f'<p>{s["lt_n"]:,} low-tail precincts '
+          f'({s["zero_flags"]} zeros + {nz} '
+          f'BSW&gt;0). Null-calibrated excess: '
+          f'{s["lt_excess"]:,.0f} '
+          f'votes (p={s["lt_p"]:.3f}).</p>')
     h += '<h3>3: Recount Extrapolation</h3>'
     h += '<p>50 BSW-selected recounts. Selection '
     h += 'bias limits national extrapolation.</p>'
     h += '<h3>4: Official Corrections</h3>'
-    h += '<p>+4,277 BSW (44.9% of deficit) via '
-    h += 'normal verification process.</p>'
+    h += (f'<p>+{s["bsw_delta"]:,} BSW '
+          f'({s["recovery_pct"]:.1f}% of deficit) '
+          f'via normal verification process.</p>')
     return h
 
 
-def sec_conclusion():
+def sec_conclusion(s):
     h = '<h2>Conclusion</h2>'
     h += '<div class="finding">'
-    h += 'The 9,529-vote deficit is small enough '
-    h += 'that targeted recounts are justified. '
-    h += 'Official corrections recovered 44.9%, '
-    h += '5,145 excess low-tail missing votes are '
-    h += 'statistically significant (p=0.005), '
-    h += 'and forensic tests lack power to detect '
-    h += 'diffuse errors. The question is not '
-    h += 'settled &mdash; it requires recounts.'
+    h += (f'The {s["deficit"]:,}-vote deficit is small '
+          f'enough that targeted recounts are '
+          f'justified. Official corrections recovered '
+          f'{s["recovery_pct"]:.1f}%, '
+          f'{s["lt_excess"]:,.0f} excess low-tail '
+          f'missing votes are statistically '
+          f'significant (p={s["lt_p"]:.3f}), '
+          f'and forensic tests lack power to detect '
+          f'diffuse errors. The question is not '
+          f'settled &mdash; it requires recounts.')
     h += '</div>'
     return h
 
@@ -326,20 +390,21 @@ def render(sections):
 
 
 def main():
+    s = load_key_stats()
     df, pred, lr, xgb, _ = load_data()
     print("Generating sections...")
     secs = [
-        sec_executive(),
-        sec_gap(),
-        sec_corrections(),
-        sec_power(),
-        sec_claims(),
+        sec_executive(s),
+        sec_gap(s),
+        sec_corrections(s),
+        sec_power(s),
+        sec_claims(s),
         sec_model_perf(lr, xgb),
         sec_residual_dist(pred),
         sec_turnout(df),
         sec_benford(df),
         sec_skew_kurt(pred),
-        sec_conclusion(),
+        sec_conclusion(s),
     ]
     print("Rendering HTML...")
     html = render(secs)
