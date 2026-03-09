@@ -61,8 +61,8 @@ Datenquelle: © Die Bundeswahlleiterin, Wiesbaden 2025 ([bundeswahlleiterin.de](
 ## Prediction Results
 
 95,046 precincts, 29 party models, GroupKFold(10) by Wahlkreis,
-Ridge(alpha=5000). Independence-first model uses no 2025
-Erststimmen.
+Ridge(alpha=5000). BSW uses strict features (no 2025
+Erststimmen); other parties use base features.
 
 | Party | LR R² | Notes |
 |-------|-------|-------|
@@ -132,9 +132,10 @@ normal demographic pattern matching other parties.
 means are near-zero in both channels (Urne -0.006, Brief
 +0.013pp). No channel-specific manipulation.
 
-**3. Second-digit Benford's Law** — BSW χ²=24.1 (p=0.004),
-but FDP is worse (χ²=50.0, p≈0) and AfD far worse (χ²=385).
-Die Linke passes cleanly (p=0.23). Not a BSW-specific anomaly.
+**3. Second-digit Benford's Law** — BSW fails mildly,
+but FDP is worse and AfD far worse.
+Die Linke passes cleanly. Not a BSW-specific anomaly.
+(See report for current computed χ² values.)
 
 **4. Precinct-size stratification** — BSW residuals have a
 weak positive trend with precinct size (Spearman +0.066):
@@ -150,10 +151,10 @@ mixed-sign. No evidence of BSW ballots being invalidated.
 peak at -0.21. FDP and Die Linke also unimodal. No hidden
 "depleted" subpopulation.
 
-**7. Kurtosis & skewness** — BSW skew = +0.53 (rank 6/29,
-slightly positive right tail). Missing votes would produce
-*negative* skew (left tail). Kurtosis = 3.8 (rank 27/29,
-among the lowest). Completely normal distribution shape.
+**7. Kurtosis & skewness** — BSW has slightly positive right
+tail skew. Missing votes would produce *negative* skew (left
+tail). Near-normal kurtosis. Completely normal distribution
+shape. (See report for current computed values.)
 
 **8. Geographic clustering** — Only 5/299 Wahlkreise have
 BSW mean residual z < -2. In those 5, FDP residuals are
@@ -206,7 +207,7 @@ recounts are justified:
 - 5,145 excess missing votes (p=0.005)
 - Forensic tests lack power for diffuse errors
 - 3 affidavit-backed cases confirmed in registry
-- Independence-first model (no e25) confirms R²=0.64
+- Strict BSW model (no e25) confirms R²=0.64
 
 ## Evidence Registry
 

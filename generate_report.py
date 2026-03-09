@@ -76,7 +76,7 @@ missing votes (null-calibrated p=0.005)</li>
 9,529 votes spread across precincts</li>
 <li>3 affidavit-backed cases confirmed in
 anomaly registry</li>
-<li>Independence-first model (no 2025 Erststimmen)
+<li>Strict BSW model (no 2025 Erststimmen)
 confirms predictions (R²=0.64)</li>
 </ul>
 </div>"""
@@ -143,8 +143,9 @@ def sec_model_perf(lr, xgb):
     tbl += "</tbody></table>"
     return (f"<h2>Model Performance</h2>"
             f"<p>95,046 precincts, GroupKFold(10) "
-            f"by Wahlkreis. Independence-first LR "
-            f"uses no 2025 Erststimmen.</p>"
+            f"by Wahlkreis. LR: BSW uses strict "
+            f"features (no 2025 Erststimmen); "
+            f"other parties use base features.</p>"
             f"{chart}{tbl}")
 
 
@@ -241,9 +242,17 @@ def sec_skew_kurt(pred):
                 f"<td>{s:+.3f}</td>"
                 f"<td>{k:.2f}</td></tr>")
     tbl += "</table>"
-    tbl += "<p>BSW skew=+0.53 (positive right tail)."
-    tbl += " Missing votes would produce negative "
-    tbl += "skew. Kurtosis 3.8 (near-normal).</p>"
+    # Use computed BSW values instead of hardcoding
+    rc = "BSW_resid"
+    if rc in pred.columns:
+        r = pred[rc].dropna().values
+        s_bsw = skew(r)
+        k_bsw = kurtosis(r, fisher=False)
+        tbl += (f"<p>BSW skew={s_bsw:+.2f} "
+                f"(positive right tail). "
+                f"Missing votes would produce negative "
+                f"skew. Kurtosis {k_bsw:.1f} "
+                f"(near-normal).</p>")
     return tbl
 
 

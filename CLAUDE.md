@@ -139,9 +139,12 @@ Repo: `~/git/bsw_analysis` (github.com/tom-doerr/bsw_analysis)
 - 68% Jaccard overlap of suspicious precincts
 - Spearman ρ=0.878, Top-20: 70%, Top-50: 94%
 
-## Pipeline Consistency (v6)
+## Pipeline Consistency (v7)
 - BSW_pred = strict model (no e25), BSW_pred_base = old
 - All 22 downstream scripts use BSW_pred (now strict)
+- LR table is hybrid: BSW strict, other parties base (labeled accordingly)
+- Report reads computed skew/kurtosis/Benford dynamically (no hardcoded stats)
+- README defers to report for exact forensic numbers (no drift)
 - GroupKFold(10) by Wahlkreis (honest geographic CV)
 - Ridge(alpha=5000) instead of LinearRegression
 - bb_utils.estimate_rho + bb_p0 (shared module)
