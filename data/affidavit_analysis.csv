@@ -1,4 +1,4 @@
-id,land,wkr,gem,bsw,bd,valid,pred,p0,rz
-1,SH,7,"Wedel, Stadt",0,31,780,3.616344968435424,5.618785038007719e-13,-3.616344968435424
-2,NI,52,Katlenburg-Lindau,0,16,544,3.982917587763362,3.891439935513084e-10,-3.982917587763362
-3,SN,157,Reinhardtsdorf-Schöna,0,12,152,8.50920223619711,2.414574687949731e-06,-8.50920223619711
+id,land,wkr,gem,bsw,bd,valid,pred,p0,rz,in_registry,registry_flags
+1,SH,7,"Wedel, Stadt",0,31,780,3.616344968435424,4.556229181937555e-06,-3.616344968435424,True,suspicious_zero|high_bd|zero_bsw_nonzero_bd
+2,NI,52,Katlenburg-Lindau,0,16,544,3.982917587763362,1.4384871014833531e-05,-3.982917587763362,True,suspicious_zero|large_negative_resid|high_bd|zero_bsw_nonzero_bd
+3,SN,157,Reinhardtsdorf-Schöna,0,12,152,8.50920223619711,3.567737931915742e-05,-8.50920223619711,True,suspicious_zero|large_negative_resid|high_bd|zero_bsw_nonzero_bd

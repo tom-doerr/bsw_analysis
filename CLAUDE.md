@@ -72,7 +72,7 @@ Repo: `~/git/bsw_analysis` (github.com/tom-doerr/bsw_analysis)
 - BSW biggest anomalies in Brandenburg and Sachsen-Anhalt
 
 ## Forensic Results (no evidence of fraud)
-- No BSW↔BD vote-swapping (decorrelation, r=+0.004)
+- No BSW↔BD vote-swapping (decorrelation, r=+0.028)
 - 11 forensic tests all PASS: turnout corr, Brief/Urne, 2nd-digit
   Benford, size strat, invalid corr, multimodality, kurtosis/skew,
   geo clustering, zero-vote Poisson, GMM, feature importance
@@ -80,7 +80,7 @@ Repo: `~/git/bsw_analysis` (github.com/tom-doerr/bsw_analysis)
 - East-West Brief/Urne split matches Die Linke pattern exactly
 
 ## BSW Claims Test Results
-- Claim 1 (BSW↔BD ballot swap): r=+0.004, no swap signature. Need ~12.5% of ALL BD votes for 5%.
+- Claim 1 (BSW↔BD ballot swap): r=+0.028, no swap signature. Need ~12.5% of ALL BD votes for 5%.
 - Claim 2 (zero-vote precincts): 481 zeros (1.41x expected), max impact +2,873 votes (< 9,529 needed)
 - Claim 3 (extrapolation from 50 recounts): sample biased (BSW-selected), not representative
 - Claim 4 (disproportionate corrections): selection bias makes analysis uninformative

@@ -16,6 +16,8 @@ OUT = Path("docs/report.html")
 PARTIES = ["BSW", "AfD", "CDU", "SPD", "GRÜNE",
            "Die Linke", "FDP", "CSU", "FREIE WÄHLER"]
 CONTROLS = ["FDP", "Die Linke"]
+N_FILED = 8      # eidesstattliche Versicherungen filed
+N_RECOUNTS = 50  # BSW-selected recounts
 PLOTLY_CFG = dict(include_plotlyjs="cdn",
                   full_html=False)
 
@@ -59,6 +61,8 @@ def _load_secondary(s):
     aff = pd.read_csv(
         DATA / "affidavit_analysis.csv")
     s["n_affidavits"] = len(aff)
+    s["n_registry_matched"] = int(
+        aff["in_registry"].sum())
     lr = pd.read_csv(
         DATA / "wahlbezirk_lr_metrics.csv",
         index_col=0)
@@ -127,7 +131,7 @@ f'(p={s["lt_p"]:.3f})</li>'
 f'<li>4 powered forensic tests have 0% power '
 f'to detect {s["deficit"]:,} votes spread '
 f'across precincts</li>'
-f'<li>{s["n_affidavits"]} of 8 affidavit cases '
+f'<li>{s["n_registry_matched"]} of {N_FILED} affidavit cases '
 f'matched to anomaly registry</li>'
 f'<li>Strict BSW model (no 2025 Erststimmen) '
 f'confirms predictions '
@@ -152,10 +156,14 @@ def sec_power(s):
     pw = pd.read_csv(DATA / "power_analysis.csv")
     d = s["deficit"]
     scen = pw["scenario"].unique()
-    diffuse = scen[0] if len(scen) else f"{d}x1"
+    diffuse = next(
+        (s for s in scen if s.endswith("x1")),
+        f"{d}x1")
     max_diff = pw[pw["scenario"]==diffuse][
         "rate"].max()
-    conc_scen = scen[2] if len(scen) > 2 else ""
+    conc_scen = next(
+        (s for s in scen if "x10" in s
+         and "x100" not in s), "")
     conc = pw[pw["scenario"] == conc_scen]
     mc = conc["rate"].max() if len(conc) else 0
     bt = (conc.loc[conc["rate"].idxmax(), "test"]
@@ -362,7 +370,7 @@ def sec_claims(s, pred):
           f'{s["lt_excess"]:,.0f} '
           f'votes (p={s["lt_p"]:.3f}).</p>')
     h += '<h3>3: Recount Extrapolation</h3>'
-    h += '<p>50 BSW-selected recounts. Selection '
+    h += f'<p>{N_RECOUNTS} BSW-selected recounts. Selection '
     h += 'bias limits national extrapolation.</p>'
     h += '<h3>4: Official Corrections</h3>'
     h += (f'<p>+{s["bsw_delta"]:,} BSW '

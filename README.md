@@ -115,7 +115,7 @@ only 15% detectable (skew test alone).
 
 Tested whether votes were swapped between them:
 
-- Raw residual correlation: +0.004 (no anti-correlation)
+- Raw residual correlation: +0.028 (no anti-correlation)
 - Would need ~12.5% of ALL BD votes for BSW to reach 5%
 - BSW+BD pair does not stand out vs control pairs
 
@@ -192,7 +192,7 @@ Both models flag the same precincts.
 
 BSW got 4.981%, missing 5% by 9,529 votes (0.019pp).
 
-**Claim 1: Ballot confusion** — r=+0.004, no systematic
+**Claim 1: Ballot confusion** — r=+0.028, no systematic
 swap detected. Would need ~12.5% of BD votes.
 
 **Claim 2: Zero-vote precincts** — 784 low-tail precincts.

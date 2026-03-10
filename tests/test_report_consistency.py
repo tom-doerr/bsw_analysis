@@ -99,3 +99,38 @@ def test_readme_bb_excess(readme):
         if len(row):
             ex = row.iloc[0]["exc_bb"]
             assert f"{ex:+.1f}" in readme
+
+
+def test_readme_swap_r(readme):
+    """README swap r matches computed value."""
+    pred = pd.read_csv(
+        DATA / "wahlbezirk_lr_predictions.csv",
+        low_memory=False)
+    b = pred["BSW_resid"].dropna()
+    bd_col = [c for c in pred.columns
+              if "DEUTSCHLAND" in c and "resid" in c]
+    assert bd_col, "No BD resid column"
+    d = pred[bd_col[0]].dropna()
+    idx = b.index.intersection(d.index)
+    computed = b.loc[idx].corr(d.loc[idx])
+    claim1 = readme[readme.index("Claim 1"):]
+    m = re.search(r"r=\+([\d.]+)", claim1)
+    assert m, "No r=+X.XXX in README Claim 1"
+    readme_r = float(m.group(1))
+    assert abs(readme_r - computed) < 0.002
+
+
+def test_affidavit_csv_has_registry_columns():
+    """affidavit_analysis.csv has registry cols."""
+    aff = pd.read_csv(
+        DATA / "affidavit_analysis.csv")
+    assert "in_registry" in aff.columns
+    assert "registry_flags" in aff.columns
+
+
+def test_power_scenario_names():
+    """power_analysis.csv has expected scenarios."""
+    pw = pd.read_csv(DATA / "power_analysis.csv")
+    scen = set(pw["scenario"].unique())
+    assert "9529x1" in scen
+    assert "953x10" in scen

@@ -6,7 +6,7 @@ import numpy as np
 import pandas as pd
 from pathlib import Path
 
-from bb_utils import bb_p0
+from bb_utils import bb_p0, estimate_rho
 from wahlbezirk_lr import (load_2025_wbz, LAND_CODE,
                             validate_totals)
 
@@ -92,8 +92,8 @@ def match_to_precincts(cases, df, pred):
     gem=df.get("Gemeindename",
                pd.Series([""]*len(df)))
     bp=pred["BSW_pred"].values/100
-    lam=np.maximum(bp*g, 1e-6)
-    p0=bb_p0(lam)
+    rho=estimate_rho(pred, g)
+    p0=bb_p0(g, bp, rho)
     matched = []
     for c in cases:
         r = _match_one(c, df, bsw, bd, wkr,
