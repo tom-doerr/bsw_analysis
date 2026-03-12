@@ -122,8 +122,8 @@ Tested whether votes were swapped between them:
 ### Forensic Battery (11 tests)
 
 10 of 11 tests show no BSW-specific anomaly; Benford 2nd
-digit is marginal (see report for values). All have 0%
-power for diffuse errors. BSW matches controls (FDP, Die
+digit is marginal (see report for values). The 4 powered
+tests have 0% power for diffuse errors. BSW matches controls (FDP, Die
 Linke) on every test.
 
 **1. Turnout–BSW correlation** — Weak positive overall
@@ -137,8 +137,8 @@ normal demographic pattern matching other parties.
 means are near-zero in both channels (Urne -0.006, Brief
 +0.013pp). No channel-specific manipulation.
 
-**3. Second-digit Benford's Law** — BSW fails mildly,
-but FDP is worse and AfD far worse.
+**3. Second-digit Benford's Law** — BSW deviates
+(p=0.0014), but FDP is worse and AfD far worse.
 Die Linke passes cleanly. Not a BSW-specific anomaly.
 (See report for current computed χ² values.)
 

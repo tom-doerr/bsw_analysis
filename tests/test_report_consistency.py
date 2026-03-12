@@ -101,6 +101,12 @@ def test_readme_bb_excess(readme):
             assert f"{ex:+.1f}" in readme
 
 
+_PRED_CSV = DATA / "wahlbezirk_lr_predictions.csv"
+
+
+@pytest.mark.skipif(
+    not _PRED_CSV.exists(),
+    reason="predictions CSV not present (gitignored, 125 MB)")
 def test_readme_swap_r(readme):
     """README swap r matches computed value."""
     pred = pd.read_csv(
