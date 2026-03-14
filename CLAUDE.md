@@ -152,7 +152,7 @@ Repo: `~/git/bsw_analysis` (github.com/tom-doerr/bsw_analysis)
 - bsw_affidavits.py: persists in_registry, registry_flags
 - tests: 9 report + 2 README consistency tests (24 total)
 - "4 powered forensic tests" not "forensic battery"
-- "3 of 8 affidavit cases" not "3 confirmed"
+- "All 3 publicly specified affidavit cases" (8 filed, 5 precinct IDs not yet public)
 - GroupKFold(10) by Wahlkreis (honest geographic CV)
 - Ridge(alpha=5000) instead of LinearRegression
 - bb_utils.estimate_rho + bb_p0 (shared module)

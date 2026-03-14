@@ -122,7 +122,7 @@ Tested whether votes were swapped between them:
 ### Forensic Battery (11 tests)
 
 10 of 11 tests show no BSW-specific anomaly; Benford 2nd
-digit is marginal (see report for values). The 4 powered
+digit deviates (p=0.0014, see report). The 4 powered
 tests have 0% power for diffuse errors. BSW matches controls (FDP, Die
 Linke) on every test.
 
@@ -211,7 +211,7 @@ recounts are justified:
 - Official corrections already recovered 44.9%
 - 5,145 excess missing votes (p=0.005)
 - 4 powered forensic tests lack power for diffuse errors
-- 3 of 8 affidavit cases matched to anomaly registry
+- All 3 publicly specified affidavit cases matched to anomaly registry
 - Strict BSW model (no e25) confirms R²=0.64
 
 ## Evidence Registry
@@ -219,7 +219,8 @@ recounts are justified:
 3,578 flagged precincts by 4 criteria (BB P(0), BD rank).
 Uses Beta-Binomial p0 via bb_utils.
 BB-calibrated excess: HE +20.6, NI +28.7, BY +52.1.
-All 3 affidavit cases matched.
+All 3 publicly specified affidavit cases matched
+(8 filed total; precinct IDs for remaining 5 not yet public).
 
 ## Recount Bias: Sensitivity Curve
 
@@ -244,6 +245,9 @@ scenario exploration, not proof.
 ## Usage
 
 ```
+# Step 1: generates data/wahlbezirk_lr_predictions.csv (125 MB, gitignored)
+# All downstream scripts depend on this file.
+# Alternatively: make all
 python3 wahlbezirk_lr.py        # LR prediction models
 python3 xgb_enhanced.py         # XGBoost + EW24 + Strukturdaten
 python3 bsw_bd_decorrelate.py   # decorrelation analysis
