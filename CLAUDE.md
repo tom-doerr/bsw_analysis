@@ -40,6 +40,8 @@ Repo: `~/git/bsw_analysis` (github.com/tom-doerr/bsw_analysis)
 - `low_tail_undercount.py` — Low-tail BB undercount (BSW>0 too)
 - `bsw_bd_swap.py` — BSW→BD swap misallocation model
 - `official_corrections.py` — Prelim→final corrections (Arbeitstabelle 9)
+- `recount_targets.py` — Triage funnel: 3,578→300→100 targets by miss_lb
+- `generate_casefiles.py` — Per-precinct case file generator
 
 ## Data (`data/`)
 - `btw{25,21,17,13}_wbz.zip` — Precinct-level election results
@@ -156,7 +158,16 @@ Repo: `~/git/bsw_analysis` (github.com/tom-doerr/bsw_analysis)
 - GroupKFold(10) by Wahlkreis (honest geographic CV)
 - Ridge(alpha=5000) instead of LinearRegression
 - bb_utils.estimate_rho + bb_p0 (shared module)
-- Makefile: `make all` (full), `make clean` (reset)
+- Makefile: `make all`, `make reproduce-core`, `make recount`, `make clean`
+
+## Recount Target Pipeline (v1-recount-case tag)
+- Tag: `v1-recount-case` freezes analytical state
+- `recount_targets.py`: 3,578→300 by miss_lb→100 by composite
+- `generate_casefiles.py`: per-precinct case files in casefiles/
+- `make reproduce-core`: predictions→report→tests from public data
+- `make recount`: evidence+misc→targets→case files
+- 100 targets, miss_lb ~4,400, BSW=0: 9, BSW>0: 91
+- Top: SL/Saarwellingen (6), SH/Wedel (affidavit), Essen
 
 ## Top BB Anomalies Case File
 - 81 BB-suspicious BSW=0 precincts

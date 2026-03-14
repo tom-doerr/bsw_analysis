@@ -263,4 +263,13 @@ python3 bsw_adjacency_did.py   # adjacency DiD
 python3 bsw_generative.py      # generative model
 python3 bsw_affidavits.py      # affidavit cross-reference
 python3 calibrate_zero_model.py # zero-vote calibration
+python3 recount_targets.py     # triage funnel → top 100
+python3 generate_casefiles.py  # per-precinct case files
+```
+
+**Quick paths:**
+```
+make reproduce-core  # predictions → report → tests
+make recount         # evidence → targets → case files
+make all             # everything
 ```

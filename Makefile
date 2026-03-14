@@ -1,4 +1,4 @@
-.PHONY: all clean predictions forensic evidence modeling spatial misc
+.PHONY: all clean predictions forensic evidence modeling spatial misc reproduce-core recount
 
 PYTHON ?= python
 
@@ -40,9 +40,25 @@ misc: predictions
 	$(PYTHON) bsw_swing.py
 	$(PYTHON) panel_analysis.py
 
-all: forensic evidence modeling spatial misc
+recount: evidence misc
+	$(PYTHON) recount_targets.py
+	$(PYTHON) generate_casefiles.py
+	@echo "Recount targets + case files generated."
+
+all: forensic evidence modeling spatial misc recount
 	$(PYTHON) generate_report.py
 	@echo "All outputs regenerated."
+
+# Minimal path: predictions + report + tests from public data
+reproduce-core: predictions
+	$(PYTHON) evidence_registry.py
+	$(PYTHON) low_tail_undercount.py
+	$(PYTHON) official_corrections.py
+	$(PYTHON) bsw_power.py
+	$(PYTHON) bsw_affidavits.py
+	$(PYTHON) generate_report.py
+	$(PYTHON) -m pytest tests/ -v
+	@echo "Core reproduction complete."
 
 clean:
 	rm -f data/wahlbezirk_lr_predictions.csv
@@ -50,4 +66,6 @@ clean:
 	rm -f data/*_registry.json data/*_anomalies_bb.csv
 	rm -f data/neighborhood_credibility.csv
 	rm -f data/evidence_dossier.csv data/evidence_dossier.json
+	rm -f data/recount_targets.csv
+	rm -rf casefiles/
 	@echo "Cleaned generated outputs."
